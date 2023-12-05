@@ -6,6 +6,6 @@ This repo contains the solutions to my FullStackOpen Projects.
 
 - Part0
 
-## Part0
+### Part0
 
-The part0 files can be found in the part0 folder.
+The part0 files can be found in the part0 folder..
