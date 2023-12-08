@@ -3,14 +3,12 @@ import { useState } from 'react'
 import "./App.css"
 
 const Button = ({text, onClick}) => {
-
   return (
     <button type="button" onClick={onClick}>{text}</button>
   )
 }
 
 const StatisticLine = (props) => {
-
   return (
     <tr>
       <td>{props.text}</td>
@@ -20,7 +18,6 @@ const StatisticLine = (props) => {
 }
 
 const Statistics = ({good, neutral, bad, average, positive, all}) => {
-
   if (!good && !bad && !neutral) {
 
     return <span>No feedback given</span>
