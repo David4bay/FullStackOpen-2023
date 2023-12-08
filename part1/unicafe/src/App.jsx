@@ -20,9 +20,13 @@ const StatisticLine = (props) => {
 }
 
 const Statistics = ({good, neutral, bad, average, positive, all}) => {
+
   if (!good && !bad && !neutral) {
+
     return <span>No feedback given</span>
+
     } else {
+      
   return (
     <table>
       <tbody>
@@ -37,6 +41,7 @@ const Statistics = ({good, neutral, bad, average, positive, all}) => {
   )
     }
 }
+
 
 const App = () => {
 
