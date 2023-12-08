@@ -2,6 +2,13 @@
 import { useState } from 'react'
 import "./App.css"
 
+const Button = ({text, onClick}) => {
+
+  return (
+    <button type="button" onClick={onClick}>{text}</button>
+  )
+}
+
 const StatisticLine = (props) => {
 
   return (
@@ -12,16 +19,11 @@ const StatisticLine = (props) => {
   )
 }
 
-const Button = ({text, onClick}) => {
-
-  return (
-    <button type="button" onClick={onClick}>{text}</button>
-  )
-}
-
 const Statistics = ({good, neutral, bad, average, positive, all}) => {
-
-  return(
+  if (!good && !bad && !neutral) {
+    return <span>No feedback given</span>
+    } else {
+  return (
     <table>
       <tbody>
       <StatisticLine text="good" value ={good} />
@@ -33,6 +35,7 @@ const Statistics = ({good, neutral, bad, average, positive, all}) => {
       </tbody>
     </table>
   )
+    }
 }
 
 const App = () => {
@@ -68,19 +71,14 @@ const App = () => {
       <p>
       <strong>statistics</strong>
       </p>
-      {!good && !bad && !neutral ? (
-        <span>No feedback given</span>
-      ) :(
-        <Statistics 
-        good={good} 
-        neutral={neutral}
-        bad={bad}
-        average={average}
-        positive={positive}
-        all={all}
-        />
-        )
-      }
+      <Statistics
+      good={good} 
+      neutral={neutral}
+      bad={bad}
+      average={average}
+      positive={positive}
+      all={all} 
+      />
     </div>
   )
 }
