@@ -4,7 +4,7 @@ import './App.css'
 
 const CheckVote = ({anecdotes, anecdoteNumber, points}) => {
 
-  const {max, anecdoteNumberIndex} = anecdoteNumber
+  const {anecdoteNumberIndex} = anecdoteNumber
 
   return (
     <>
@@ -60,7 +60,7 @@ const App = () => {
       anecdoteNumberIndex = Number(firstItem)
     }
   }
-  return {anecdoteNumberIndex, max}
+  return {anecdoteNumberIndex}
  }
 
   return (
