@@ -55,7 +55,7 @@ const App = () => {
 
   const all = good + bad + neutral
   const average = ((good * 1 + neutral * 0 + bad * - 1) / all) || 0
-  const positive = (good / all * 100) ? ((good / all * 100) + "%") : "0%"
+  const positive = (good / all * 100) ? `${good / all * 100}%` : "0%"
 
   return (
     <div>
