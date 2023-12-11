@@ -28,9 +28,6 @@ const App = () => {
     if (searchFieldInput === '') {
       setPersons(people)
     }
-    if (persons.length === 0) { // left this in as it makes more sense to return all matches if no match and rematch a new value
-      setPersons(people)
-    }
   }, [people, persons, searchFieldInput])
 
   const handleSubmit = (e) => {
@@ -63,7 +60,7 @@ const App = () => {
 
     setSearchFieldInput(value)
 
-    const filterList = persons.filter(({ name }) => name.toLowerCase().includes(searchFieldInput.toLowerCase()))
+    const filterList = people.filter(({ name }) => name.toLowerCase().includes(searchFieldInput.toLowerCase()))
 
     setPersons(filterList)
   }
@@ -101,14 +98,16 @@ const App = () => {
       <>
       <h2>Found Numbers</h2>
       <ul>      
-      {persons.map(({name, number, id}) => (
+      {persons.length > 0 ? (persons.map(({name, number, id}) => (
       <Persons 
       key={id}
       name={name}
       number={number}
       id={id}
       />
-      ))}
+      ))) : (
+        <h3>No results found.</h3>
+      )}
       </ul>
       </>
         ) : ''
