@@ -1,8 +1,10 @@
 /* eslint-disable react/prop-types */
 
-const Persons = ({name, number, id}) => {
+const Persons = ({name, number, id, fetchedList, handleDeletedNumber}) => {
     return (
-            <li>{name} {number} {id}</li>   
+        <>
+            <li>{name} {number} {fetchedList ? <button type="button" onClick={() => handleDeletedNumber(name, id)} >delete</button> : ''}</li>
+        </>
     )
 }
 

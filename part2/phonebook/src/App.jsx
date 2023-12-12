@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useLayoutEffect } from 'react'
-import axios from 'axios'
 import './App.css'
 import PersonForm from './components/PersonForm'
 import Filter from './components/Filter'
 import Persons from './components/Persons'
+import services from './services/fetchNumbers'
 
 const App = () => {
 
@@ -21,6 +21,8 @@ const App = () => {
 
   const searchRef = useRef(null)
 
+  const fetchedList = useRef(null)
+
   useLayoutEffect(() => {
     if (searchFieldInput === '') {
       setPersons(people.current)
@@ -28,18 +30,18 @@ const App = () => {
   }, [persons, searchFieldInput])
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons').then(response => {
-      people.current = response.data
-      setPersons(response.data)
-      console.log("people.current value", people.current)
+    services.getAll().then(response => {
+      people.current = response
+      setPersons(response)
+      console.log("people.current value on load", people.current)
       })
   }, [])
 
   useEffect(() => {
     if (postSuccessful) {
-      axios.get('http://localhost:3001/persons').then(response => {
-        people.current = response.data
-        setPersons(response.data)
+      services.getAll().then(response => {
+        people.current = response
+        setPersons("fetched on success", response)
         console.log("people.current value", people.current)
         })
     }
@@ -52,22 +54,38 @@ const App = () => {
 
   let nameInPhoneBook =  persons?.filter((person) => person.name === newName)
 
-  if (nameInPhoneBook.length > 0) {
-    return alert(`${newName} is already added to phonebook`)
-  }
   const noteObject = { name: newName, number: newPhoneNumber}
-  axios
-    .post('http://localhost:3001/persons', noteObject)
-    .then(response => {
-      console.log(response)
-      setPostSuccessful(true)
-    })
 
-    setNewName('')
+  let confirmReplace
 
-    setNewPhoneNumber('')
+  if (nameInPhoneBook.length > 0) {
+      confirmReplace = window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)
+    }
+    if (confirmReplace) {
+        return services.replace(noteObject, nameInPhoneBook[0].id).then(response => {
+          console.log("replaced", response)
+          setPostSuccessful(true)
+          setNewName('')
+          setNewPhoneNumber('')
+        }).catch((error) => {
+          alert(`Unable to create ${noteObject.name} as new contact`)
+          console.error(error)
+        })
+    } 
+console.log("nameinphonebook", nameInPhoneBook[0])
+
+  if (!nameInPhoneBook[0]) {
+    services.create(noteObject).then(response => {
+        console.log("created", response)
+        setPostSuccessful(true)
+        setNewName('')
+        setNewPhoneNumber('')
+      }).catch((error) => {
+        alert(`Unable to create ${noteObject.name} as new contact`)
+        console.error(error)
+      })
   }
-
+  }
 
   const handleTextChange = (e) => {
     setNewName(e.target.value)
@@ -86,6 +104,21 @@ const App = () => {
     const filterList = people?.current.filter(({ name }) => name.toLowerCase().includes(searchFieldInput.toLowerCase()))
 
     setPersons(filterList)
+  }
+
+  const handleDeletedNumber = (name, id) => {
+    let deletePrompt = window.confirm(`Delete ${name}?`)
+    try {
+      if (deletePrompt) {
+        services.deleteNumber(id).then(response => {
+          console.log("deleted", response)
+          setPostSuccessful(true)
+        })
+      }
+    } catch(error) {
+      window.alert(`${name} has already been deleted from phonebook.`)
+      console.error(error)
+    }
   }
 
   return (
@@ -112,6 +145,8 @@ const App = () => {
         name={name}
         number={number}
         id={id}
+        fetchedList={fetchedList.current = true}
+        handleDeletedNumber={handleDeletedNumber}
         />
         ))
         }
@@ -127,6 +162,8 @@ const App = () => {
       name={name}
       number={number}
       id={id}
+      fetchedList={fetchedList.current = false}
+      handleDeletedNumber={handleDeletedNumber}
       />
       ))) : (
         <h3>No results found.</h3>
