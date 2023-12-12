@@ -1,8 +1,10 @@
 /* eslint-disable react/prop-types */
 import noteService from './services/notes'
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 import Note from './components/Note'
+import Notification from './components/Notification'
+import Footer from './components/Footer'
+import './index.css'
 
 const App = () => {
   const [notes, setNotes] = useState(null)
@@ -10,12 +12,11 @@ const App = () => {
     'a new note...'
   )
   const [showAll, setShowAll] = useState(true)
+  const [errorMessage, setErrorMessage] = useState('some error happened...')
 
   useEffect(() => {
     console.log('effect')
-    axios
-      .get('http://localhost:3001/notes')
-      .then(response => {
+    noteService.getAll().then(response => {
         console.log('promise fulfilled')
         setNotes(response.data)
       })
@@ -64,9 +65,13 @@ const App = () => {
       .then(returnedNote => {
         setNotes(notes.map(note => note.id !== id ? note : returnedNote))
       }).catch((error) => {
-        alert(
-          `the note '${note.content}' was already deleted from server`
-        )
+        setErrorMessage(
+          `Note '${note.content}' was already removed from server`
+          )
+          console.error(error)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
         setNotes(notes.filter(n => n.id !== id))
       })
   }
@@ -75,6 +80,7 @@ const App = () => {
   return (
     <div>
       <h1>Notes</h1>
+      <Notification message={errorMessage} />
       <div>
         <button onClick={() => setShowAll(!showAll)}>
           show {showAll ? 'important' : 'all' }
@@ -96,6 +102,7 @@ const App = () => {
         />
         <button type="submit" onClick={addNote}>save</button>
       </form>   
+      <Footer />
     </div>
   )
 }
