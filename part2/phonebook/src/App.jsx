@@ -1,4 +1,5 @@
-import { useState, useRef, useLayoutEffect, useMemo } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect } from 'react'
+import axios from 'axios'
 import './App.css'
 import PersonForm from './components/PersonForm'
 import Filter from './components/Filter'
@@ -6,15 +7,9 @@ import Persons from './components/Persons'
 
 const App = () => {
 
-  const people = useMemo(() => ([
-    { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ]
-  ), [])
+  let people = useRef(null)
 
-  const [persons, setPersons] = useState(people) 
+  const [persons, setPersons] = useState(null) 
 
   const [searchFieldInput, setSearchFieldInput] = useState('')
 
@@ -22,29 +17,57 @@ const App = () => {
   
   const [newPhoneNumber, setNewPhoneNumber] = useState('')
 
+  const [postSuccessful, setPostSuccessful] = useState(false)
+
   const searchRef = useRef(null)
 
   useLayoutEffect(() => {
     if (searchFieldInput === '') {
-      setPersons(people)
+      setPersons(people.current)
     }
-  }, [people, persons, searchFieldInput])
+  }, [persons, searchFieldInput])
+
+  useEffect(() => {
+    axios.get('http://localhost:3001/persons').then(response => {
+      people.current = response.data
+      setPersons(response.data)
+      console.log("people.current value", people.current)
+      })
+  }, [])
+
+  useEffect(() => {
+    if (postSuccessful) {
+      axios.get('http://localhost:3001/persons').then(response => {
+        people.current = response.data
+        setPersons(response.data)
+        console.log("people.current value", people.current)
+        })
+    }
+    return () => setPostSuccessful(false)
+  }, [postSuccessful])
 
   const handleSubmit = (e) => {
 
-  let newId = persons[persons.length - 1].id
-
   e.preventDefault()
 
-  const nameInPhoneBook = persons.filter((person) => person.name === newName)
+  let nameInPhoneBook =  persons?.filter((person) => person.name === newName)
 
   if (nameInPhoneBook.length > 0) {
     return alert(`${newName} is already added to phonebook`)
   }
-    setPersons([...persons, { name: newName, number: newPhoneNumber, id: newId + 1}])
+  const noteObject = { name: newName, number: newPhoneNumber}
+  axios
+    .post('http://localhost:3001/persons', noteObject)
+    .then(response => {
+      console.log(response)
+      setPostSuccessful(true)
+    })
+
     setNewName('')
+
     setNewPhoneNumber('')
-}
+  }
+
 
   const handleTextChange = (e) => {
     setNewName(e.target.value)
@@ -60,7 +83,7 @@ const App = () => {
 
     setSearchFieldInput(value)
 
-    const filterList = people.filter(({ name }) => name.toLowerCase().includes(searchFieldInput.toLowerCase()))
+    const filterList = people?.current.filter(({ name }) => name.toLowerCase().includes(searchFieldInput.toLowerCase()))
 
     setPersons(filterList)
   }
@@ -83,7 +106,7 @@ const App = () => {
       <h2>Numbers</h2>
       <ul>
         {
-        people.map(({name, number, id}) => (
+        people.current?.map(({name, number, id}) => (
         <Persons
         key={id}
         name={name}
@@ -98,7 +121,7 @@ const App = () => {
       <>
       <h2>Found Numbers</h2>
       <ul>      
-      {persons.length > 0 ? (persons.map(({name, number, id}) => (
+      {persons?.length > 0 ? (persons?.map(({name, number, id}) => (
       <Persons 
       key={id}
       name={name}
