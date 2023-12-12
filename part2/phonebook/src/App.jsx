@@ -4,6 +4,7 @@ import PersonForm from './components/PersonForm'
 import Filter from './components/Filter'
 import Persons from './components/Persons'
 import services from './services/fetchNumbers'
+import Notification from './components/Notification'
 
 const App = () => {
 
@@ -18,6 +19,10 @@ const App = () => {
   const [newPhoneNumber, setNewPhoneNumber] = useState('')
 
   const [postSuccessful, setPostSuccessful] = useState(false)
+
+  const [message, setMessage] = useState(null)
+
+  const [success, setSuccess] = useState(true)
 
   const searchRef = useRef(null)
 
@@ -48,6 +53,16 @@ const App = () => {
     return () => setPostSuccessful(false)
   }, [postSuccessful])
 
+  useEffect(() => {
+    let timeout
+    if (message) {
+      timeout = setTimeout(() => {
+        setMessage(null)
+      }, 5000)
+    }
+    return () => clearTimeout(timeout)
+  }, [message])
+
   const handleSubmit = (e) => {
 
   e.preventDefault()
@@ -65,10 +80,13 @@ const App = () => {
         return services.replace(noteObject, nameInPhoneBook[0].id).then(response => {
           console.log("replaced", response)
           setPostSuccessful(true)
+          setMessage(`Added ${response.name}`)
+          setSuccess(true)
           setNewName('')
           setNewPhoneNumber('')
         }).catch((error) => {
-          alert(`Unable to create ${noteObject.name} as new contact`)
+          setMessage(`Information of ${nameInPhoneBook[0].name} has already been removed from server`)
+          setSuccess(false)
           console.error(error)
         })
     } 
@@ -78,10 +96,12 @@ console.log("nameinphonebook", nameInPhoneBook[0])
     services.create(noteObject).then(response => {
         console.log("created", response)
         setPostSuccessful(true)
+        setMessage(`Added ${response.name}`)
+        setSuccess(true)
         setNewName('')
         setNewPhoneNumber('')
       }).catch((error) => {
-        alert(`Unable to create ${noteObject.name} as new contact`)
+        setMessage(`Unable to create ${noteObject.name} as new contact`)
         console.error(error)
       })
   }
@@ -116,7 +136,7 @@ console.log("nameinphonebook", nameInPhoneBook[0])
         })
       }
     } catch(error) {
-      window.alert(`${name} has already been deleted from phonebook.`)
+      setMessage(`${name} has already been deleted from phonebook.`)
       console.error(error)
     }
   }
@@ -124,6 +144,10 @@ console.log("nameinphonebook", nameInPhoneBook[0])
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification 
+      message={message} 
+      success={success}
+      />
       <Filter 
       searchRef={searchRef}
       searchFieldInput={searchFieldInput}
