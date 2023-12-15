@@ -26,25 +26,41 @@ const App = () => {
 
   
   useEffect(() => {
+
+    let countryContainer = []
+
     if (loading) {
-      axios.get('../db.json').then((response) => {
+
+      axios.get('https://studies.cs.helsinki.fi/restcountries/api/all').then((response) => {
+
         console.log(response.data)
+
         response.data.filter(({name}) => {
-          if (name.common.toLowerCase() == searchValue.trim() || name.common.includes(searchValue.trim())) {
-            console.log(name.common)
+
+          const {common} = name
+
+          if (common.toLowerCase().includes(searchValue.toLowerCase())) {
+
+            console.log(common)
             setLoading(false)
-            // setCountryData()
+            countryContainer.push(common)
+            setCountryData(countryContainer)
+
           } else {
+
             console.log("too long")
             setLoading(false)
+
           }
         })
       }).catch((error) => {
+
           console.log("error", error)
           setLoading(false)
+          
       })
     }
-  }, [searchValue, setLoading])
+  }, [loading, searchValue, setLoading])
 
   return (
     <div>

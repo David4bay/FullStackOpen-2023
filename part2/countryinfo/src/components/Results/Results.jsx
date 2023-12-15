@@ -8,10 +8,24 @@ const Results = ({searchedCountries, loading}) => {
         return <p>Loading...</p>
     }
 
+    if (searchedCountries?.length > 10) {
+        return <p>Too many matches, specify another filter</p>
+    }
+
+    // if (searchedCountries?.length === 1) {
+    //     return (
+    //         <div>
+    //             {searchedCountries?.map(())}
+    //         </div>
+    //     )
+    // }
+
     return (
     <ul>
     {searchedCountries?.map((name) => (
-        <li key={name.toString()}>{name}</li>
+        <>
+        <li key={name.toString()}>{name} <button>Show</button></li>
+        </>
     ))}
     </ul>
     )
