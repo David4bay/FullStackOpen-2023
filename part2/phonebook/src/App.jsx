@@ -87,6 +87,7 @@ const App = () => {
         }).catch((error) => {
           setMessage(`Information of ${nameInPhoneBook[0].name} has already been removed from server`)
           setSuccess(false)
+          setPostSuccessful(true)
           console.error(error)
         })
     } 
@@ -102,6 +103,8 @@ console.log("nameinphonebook", nameInPhoneBook[0])
         setNewPhoneNumber('')
       }).catch((error) => {
         setMessage(`Unable to create ${noteObject.name} as new contact`)
+        setSuccess(false)
+        setPostSuccessful(true)
         console.error(error)
       })
   }
@@ -128,17 +131,16 @@ console.log("nameinphonebook", nameInPhoneBook[0])
 
   const handleDeletedNumber = (name, id) => {
     let deletePrompt = window.confirm(`Delete ${name}?`)
-    try {
       if (deletePrompt) {
         services.deleteNumber(id).then(response => {
           console.log("deleted", response)
           setPostSuccessful(true)
-        })
-      }
-    } catch(error) {
-      setMessage(`${name} has already been deleted from phonebook.`)
-      console.error(error)
-    }
+        }).catch((error) => {
+        setMessage(`${name} has already been deleted from phonebook.`)
+        console.error(error)
+      })
+
+    } 
   }
 
   return (
