@@ -1,6 +1,8 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
-import PropTypes from 'prop-types'
+import React from 'react'
+import { useState } from 'react'
+import SingleCountry from '../SingleCountry/SingleCountry'
 
 const Results = ({searchedCountries, loading}) => {
 
@@ -12,28 +14,23 @@ const Results = ({searchedCountries, loading}) => {
         return <p>Too many matches, specify another filter</p>
     }
 
-    // if (searchedCountries?.length === 1) {
-    //     return (
-    //         <div>
-    //             {searchedCountries?.map(())}
-    //         </div>
-    //     )
-    // }
+    if (searchedCountries?.length === 1) {
+        {searchedCountries?.map(({info}) => <SingleCountry key={info?.name.common.toString()} country={info} /> )}
+    }
+
+    console.log(searchedCountries)
 
     return (
-    <ul>
-    {searchedCountries?.map((name) => (
-        <>
-        <li key={name.toString()}>{name} <button>Show</button></li>
-        </>
+    <>
+    {searchedCountries?.map((info) => (
+        <SingleCountry 
+        key={info?.name.common} 
+        info={info} 
+        country={info} 
+        />
     ))}
-    </ul>
+    </>
     )
 }
-
-// Results.propTypes = {
-//     searchedCountries: PropTypes.array,
-//     loading: PropTypes.bool
-// }
 
 export default Results

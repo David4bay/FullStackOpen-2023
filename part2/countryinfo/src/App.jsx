@@ -4,15 +4,22 @@ import Results from "./components/Results/Results"
 import axios from 'axios'
 import './App.css'
 
+// https://studies.cs.helsinki.fi/restcountries/api/all
+
+/* 
+ Preceding axios api calls cancelled to prevent race conditions
+*/
+
 const App = () => {
 
   const [searchValue, setSearchValue] = useState('')
 
-  const [countryData, setCountryData] = useState(null)
+  const [countryData, setCountryData] = useState([])
 
   const [loading, setLoading] = useState(false)
   
   const handleSearchText = (e) => {
+
     setSearchValue(e.target.value)
     setLoading(true)
   }
@@ -26,41 +33,38 @@ const App = () => {
 
   
   useEffect(() => {
-
-    let countryContainer = []
+    const source = axios.CancelToken.source()
 
     if (loading) {
+    
+      axios.get('db.json', { cancelToken: source.token }).then((response) => {
 
-      axios.get('https://studies.cs.helsinki.fi/restcountries/api/all').then((response) => {
+      console.log("response.data", response.data)
 
-        console.log(response.data)
+      return response.data.filter((info) => {
+      
+        let nameOfCountry = info.name.common
 
-        response.data.filter(({name}) => {
+        if (nameOfCountry.toLowerCase().includes(searchValue.toLowerCase())) {
+          return info
+        }
 
-          const {common} = name
+      })  
+      }).then((data) => {
 
-          if (common.toLowerCase().includes(searchValue.toLowerCase())) {
+        setLoading(false)
+        console.log("data", data)
+        setCountryData(data)
 
-            console.log(common)
-            setLoading(false)
-            countryContainer.push(common)
-            setCountryData(countryContainer)
-
-          } else {
-
-            console.log("too long")
-            setLoading(false)
-
-          }
-        })
       }).catch((error) => {
 
           console.log("error", error)
-          setLoading(false)
+          setLoading(false)   
           
       })
     }
-  }, [loading, searchValue, setLoading])
+    return () => source.cancel()
+  }, [countryData, loading, searchValue, setLoading])
 
   return (
     <div>
