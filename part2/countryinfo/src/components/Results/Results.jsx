@@ -4,7 +4,7 @@ import React from 'react'
 import { useState } from 'react'
 import SingleCountry from '../SingleCountry/SingleCountry'
 
-const Results = ({searchedCountries, loading}) => {
+const Results = ({searchValue, searchedCountries, loading}) => {
 
     if (loading) {
         return <p>Loading...</p>
@@ -16,6 +16,10 @@ const Results = ({searchedCountries, loading}) => {
 
     if (searchedCountries?.length === 1) {
         {searchedCountries?.map(({info}) => <SingleCountry key={info?.name.common.toString()} country={info} /> )}
+    }
+
+    if (!searchedCountries && searchValue.length > 0) {
+        return <p>Sorry, no results for search query.</p>
     }
 
     console.log(searchedCountries)

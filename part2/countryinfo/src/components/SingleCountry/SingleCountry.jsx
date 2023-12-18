@@ -106,6 +106,9 @@ const SingleCountry = ({info, country}) => {
                 <SubRegion
                 country={country}
                 />
+                <p>
+                    <button type="button" onClick={showCountry}>Hide</button>
+                </p>
             </div>
         )
     }

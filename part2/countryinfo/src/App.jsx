@@ -4,10 +4,14 @@ import Results from "./components/Results/Results"
 import axios from 'axios'
 import './App.css'
 
-// https://studies.cs.helsinki.fi/restcountries/api/all
+// https://studies.cs.helsinki.fi/restcountries/api/all live api
+
+// db.json dummy api
 
 /* 
- Preceding axios api calls cancelled to prevent race conditions
+ Preceding axios api calls cancelled to prevent race conditions,
+ so there'll be cancel token errors.
+
 */
 
 const App = () => {
@@ -37,7 +41,7 @@ const App = () => {
 
     if (loading) {
     
-      axios.get('db.json', { cancelToken: source.token }).then((response) => {
+      axios.get('https://studies.cs.helsinki.fi/restcountries/api/all', { cancelToken: source.token }).then((response) => {
 
       console.log("response.data", response.data)
 
@@ -73,6 +77,7 @@ const App = () => {
       handleSearchText={handleSearchText}
       />
       <Results 
+      searchValue={searchValue}
       searchedCountries={countryData}
       loading={loading}
       />
