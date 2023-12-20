@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+const morgan = require('morgan')
 const PORT = 3001
 
 const persons = [
@@ -25,9 +26,15 @@ const persons = [
     }
 ]
 
+
 app.use(express.json())
 
 app.use(express.urlencoded({ extended: false }))
+
+morgan.token('body', req => {
+    return JSON.stringify(req.body)
+})
+app.use(morgan(':method :url :status :response-time - :total-time[digits] ms :body'))
 
 app.get('/api/persons', (request, response) => {
     response.json(persons)
@@ -36,7 +43,6 @@ app.get('/api/persons', (request, response) => {
 app.get('/info', (request, response) => {
     const markup = (`<p>Phonebook has info for ${persons.length} people</p><p>${new Date(Date.now())}`)
     response.send(markup)
-
 })  
 
 app.get('/api/persons/:id', (request, response) => {
@@ -48,12 +54,13 @@ app.get('/api/persons/:id', (request, response) => {
         return response.status(404).json({ message: 'Unable to find detail.'})
     }
     response.json(findNum)
-
 })
 
 app.post('/api/persons', (request, response) => {
 
-    const newNumber = { id: Math.floor(Math.random() * 10000 + 1), ...request.body }
+    const newName = request.body.name.trim()
+
+    const newNumber = { id: Math.floor(Math.random() * 10000 + 1), ...request.body, name: newName }
 
     const checkID = persons.findIndex((person) => person.id === newNumber.id)
 
@@ -62,28 +69,25 @@ app.post('/api/persons', (request, response) => {
     const checkDuplicateName = persons.filter((person) => person.name.toLowerCase() === newNumber.name.toLowerCase())
 
     console.log(checkDuplicateName)
-    
+
     const checkNumberExists = newNumber.number
 
     if (checkID !== -1) {
         return response.status(404).json({ error: 'ID already in use.'})
     }
-
     if (!checkName) {
         return response.status(404).json({ error: 'Invalid username.' })
     }
-
     if (checkDuplicateName.length > 0) {
         return response.status(404).json({ error: 'Sorry, username already exists.' })
     }
-
     if (!checkNumberExists) {
         return response.status(404).json({ error: 'Sorry, this number is invalid or missing.' })
     }
 
     persons.push(newNumber)
 
-    response.json(persons)
+    response.status(201).json({ message: `${newNumber.name} added`})
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -102,7 +106,5 @@ app.delete('/api/persons/:id', (request, response) => {
 
 
 app.listen(PORT, () => {
-
     console.log(`Server running on PORT ${PORT}`)
-
 })
