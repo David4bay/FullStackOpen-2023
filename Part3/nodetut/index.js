@@ -2,7 +2,7 @@ require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const app = express()
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 
 let notes = [
     {
@@ -29,8 +29,8 @@ let notes = [
     return maxId + 1
   }
 
-  app.use(cors())
   app.use(express.json())
+  app.use(cors())
 
   app.get('/', (request, response) => {
     response.send('<h1>Hello World!</h1>')
