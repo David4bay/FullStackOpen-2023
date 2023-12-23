@@ -12,7 +12,8 @@ const App = () => {
     'a new note...'
   )
   const [showAll, setShowAll] = useState(true)
-  const [errorMessage, setErrorMessage] = useState('some error happened...')
+  const [errorMessage, setErrorMessage] = useState('')
+
 
   useEffect(() => {
     console.log('effect')
@@ -80,7 +81,7 @@ const App = () => {
   return (
     <div>
       <h1>Notes</h1>
-      <Notification message={errorMessage} />
+      {errorMessage ? <Notification message={errorMessage} /> : '' }
       <div>
         <button onClick={() => setShowAll(!showAll)}>
           show {showAll ? 'important' : 'all' }
