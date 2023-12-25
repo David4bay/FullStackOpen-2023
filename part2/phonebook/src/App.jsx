@@ -80,7 +80,7 @@ const App = () => {
         return services.replace(noteObject, nameInPhoneBook[0].id).then(response => {
           console.log("replaced", response)
           setPostSuccessful(true)
-          setMessage(`Added ${response.name}`)
+          setMessage(`Added ${newName || response.name}`)
           setSuccess(true)
           setNewName('')
           setNewPhoneNumber('')
