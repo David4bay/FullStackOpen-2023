@@ -14,15 +14,6 @@ const App = () => {
   const [showAll, setShowAll] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
 
-
-  useEffect(() => {
-    console.log('effect')
-    noteService.getAll().then(response => {
-        console.log('promise fulfilled')
-        setNotes(response.data)
-      })
-  }, [])
-
   useEffect(() => {
     noteService
       .getAll()
