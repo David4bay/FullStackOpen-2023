@@ -71,6 +71,19 @@ let notes = [
     response.json(note)
   })
 
+  app.put('/api/notes/:id', (request, response) => {
+    const id = Number(request.params.id)
+    const newNote = request.body
+
+    console.log('id', id, 'body', newNote)
+
+    const indexOfNote = notes.findIndex((currentNote) => currentNote.id === id)
+
+    notes.splice(indexOfNote, 1, newNote)
+
+    response.json(newNote)
+  })
+
   app.delete('/api/notes/:id', (request, response) => {
     const id = Number(request.params.id)
     notes = notes.filter(note => note.id !== id)
