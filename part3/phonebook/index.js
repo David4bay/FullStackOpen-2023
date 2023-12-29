@@ -7,26 +7,6 @@ const morgan = require('morgan')
 const PORT = process.env.PORT || 3001
 
 const persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
 ]
 
 const unknownEndpoint = (request, response) => {
@@ -83,10 +63,10 @@ app.get('/api/persons/:id', async (request, response) => {
         return response.status(404).end()
     }
 
-    await PhonebookEntry.find({ id })
+    await PhonebookEntry.find({ id }, { _id: 0, __v: 0 })
     .then(person => {
       if (person) {
-        response.json(person)
+        response.json(person[0])
       } else {
         response.status(404).end()
       }
@@ -97,11 +77,35 @@ app.get('/api/persons/:id', async (request, response) => {
     })
 })
 
+app.put('/api/persons/:id', async (request, response) => {
+
+    const { id } = request.body
+
+    const newName = request.body.name.trim()
+    
+    const newNumber = { name: newName, number: request.body.number, id: id || Math.floor(Math.random() * 10000 + 1)  }
+
+    await PhonebookEntry.find({ number: request.body.number }).then((person) => {
+        if (!person) {
+
+            return response.status(404).json({ error: 'Sorry, username already exists.' })
+            
+        }
+
+    PhonebookEntry(newNumber).save().then((person) => {
+        response.json({ message: `replaced`})
+    }).catch((e) => {
+        console.log(e)
+        response.status(404).json({ error: 'Something went wrong'})
+    })
+    })
+})
+
 app.post('/api/persons', async (request, response) => {
 
     const newName = request.body.name.trim()
-
-    const newNumber = { id: request.body.id || Math.floor(Math.random() * 10000 + 1), number: request.body.number , name: newName }
+    
+    const newNumber = { name: newName, number: request.body.number, id: request.body.id || Math.floor(Math.random() * 10000 + 1)  }
 
     const newPhoneNumber = request.body.number
 
@@ -138,7 +142,7 @@ app.delete('/api/persons/:id', async (request, response) => {
     }
 
         await PhonebookEntry.find({ id }).then((person) => {
-            
+
             if (!person) {
                 return response.status(404).json({ error: 'Could not find number, are you sure it exists?'})
             }
