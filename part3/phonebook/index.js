@@ -1,4 +1,5 @@
 require('dotenv').config()
+const PhonebookEntry = require('./models/phoneData')
 const express = require('express')
 const cors = require('cors')
 const app = express()
@@ -28,6 +29,20 @@ const persons = [
     }
 ]
 
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+  }
+
+  const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+  
+    if (error.name === 'CastError') {
+      return response.status(400).send({ error: 'malformatted id' })
+    } 
+  
+    next(error)
+  }
+
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
@@ -42,74 +57,111 @@ app.get('/', (request, response) => {
     response.send('<h1>Hello World!</h1>')
   })
 
-app.get('/api/persons', (request, response) => {
-    response.json(persons)
+app.get('/api/persons', async (request, response) => {
+    await PhonebookEntry.find({}).then((data) => {
+        if (!data) {
+            return response.status(404).json({
+                message: 'No entry in phonebook'
+            })
+        }
+        response.json(data)
+    })
 })
 
-app.get('/info', (request, response) => {
-    const markup = (`<p>Phonebook has info for ${persons.length} people</p><p>${new Date(Date.now())}`)
-    response.send(markup)
+app.get('/info', async (request, response) => {
+    await PhonebookEntry.find({}).then((persons) => {
+        const markup = (`<p>Phonebook has info for ${persons.length} people</p><p>${new Date(Date.now())}`)
+        response.send(markup)
+    })
 })  
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', async (request, response) => {
 
     const { id } = request.params
-    const number = Number(id)
-    const findNum = persons.filter((person) => person.id === number)
-    if (!findNum || findNum === []) {
-        return response.status(404).json({ message: 'Unable to find detail.'})
+
+    if (!id) {
+        return response.status(404).end()
     }
-    response.json(findNum)
+
+    await PhonebookEntry.find({ id })
+    .then(person => {
+      if (person) {
+        response.json(person)
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => {
+      console.log(error)
+      response.status(500).end()
+    })
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', async (request, response) => {
 
     const newName = request.body.name.trim()
 
-    const newNumber = { id: Math.floor(Math.random() * 10000 + 1), ...request.body, name: newName }
+    const newNumber = { id: request.body.id || Math.floor(Math.random() * 10000 + 1), number: request.body.number , name: newName }
 
-    const checkID = persons.findIndex((person) => person.id === newNumber.id)
+    const newPhoneNumber = request.body.number
 
-    const checkName = newNumber.name 
+    if (!newPhoneNumber) {
 
-    const checkDuplicateName = persons.filter((person) => person.name.toLowerCase() === newNumber.name.toLowerCase())
-
-    console.log(checkDuplicateName)
-
-    const checkNumberExists = newNumber.number
-
-    if (checkID !== -1) {
-        return response.status(404).json({ error: 'ID already in use.'})
-    }
-    if (!checkName) {
-        return response.status(404).json({ error: 'Invalid username.' })
-    }
-    if (checkDuplicateName.length > 0) {
-        return response.status(404).json({ error: 'Sorry, username already exists.' })
-    }
-    if (!checkNumberExists) {
-        return response.status(404).json({ error: 'Sorry, this number is invalid or missing.' })
+        return response.status(404).json({ error: 'Sorry, this is an invalid number' })
     }
 
-    persons.push(newNumber)
+    await PhonebookEntry.find({ number: request.body.number }).then((person) => {
+        if (!person) {
 
-    response.status(201).json({ message: `${newNumber.name} added`})
+            return response.status(404).json({ error: 'Sorry, username already exists.' })
+            
+        }
+
+        PhonebookEntry({...newNumber}).save().then((data) => {
+
+            response.status(201).json({ message: `${newNumber.name} added`})
+
+        }).catch((e) => {
+
+            response.status(500).json({ error: 'Something went wrong.'})
+        })
+    })
+
 })
 
-app.delete('/api/persons/:id', (request, response) => {
+app.delete('/api/persons/:id', async (request, response) => {
 
-    const { id } = request.params
-    const number = Number(id)
-    const findNum = persons.findIndex((person) => person.id === number)
-    if (findNum === -1) {
-        return response.status(404).json({ message: 'Person detail does not exist.'})
+    const id = request.params.id
+
+    if (!id) {
+        return response.status(404).json({ error: 'Invalid number'})
     }
-    const removeNum = persons.splice(findNum, 1)
 
-    response.json(persons)
+        await PhonebookEntry.find({ id }).then((person) => {
+            
+            if (!person) {
+                return response.status(404).json({ error: 'Could not find number, are you sure it exists?'})
+            }
+            PhonebookEntry.deleteOne({ id }).then((entry) => {
+                return response.json(entry)
+            })
+        }).catch((e) => {
+            response.status(404).json({ error: 'Something went wrong.'})
+        })
 })
 
+app.delete('/api/persons', async (request, response) => {
 
+    await PhonebookEntry.deleteMany({}).then(() => {
+
+        response.json({ message: 'All numbers deleted.'})
+    })
+
+})
+
+app.use(unknownEndpoint)
+
+app.use(errorHandler)
 
 app.listen(PORT, () => {
     console.log(`Server running on PORT ${PORT}`)
