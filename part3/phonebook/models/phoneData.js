@@ -10,9 +10,9 @@ mongoose.connect(url).then(() => {
 })
 
 const phoneNumberSchema = new mongoose.Schema({
-    id: String,
     name: String,
-    number: String
+    number: String,
+    id: String
 })
 
 module.exports = mongoose.model('PhonebookEntry', phoneNumberSchema)
