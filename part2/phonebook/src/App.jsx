@@ -39,6 +39,8 @@ const App = () => {
       people.current = response
       setPersons(response)
       console.log("people.current value on load", people.current)
+      }).catch((e) => {
+        console.log('error', e)
       })
   }, [])
 
@@ -63,7 +65,7 @@ const App = () => {
     return () => clearTimeout(timeout)
   }, [message])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
 
   e.preventDefault()
 
@@ -77,10 +79,9 @@ const App = () => {
       confirmReplace = window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)
     }
     if (confirmReplace) {
-        return services.replace(noteObject, nameInPhoneBook[0].id).then(response => {
+          await services.replace(noteObject, nameInPhoneBook[0].id).then((response) => {
           console.log("replaced", response)
-          setPostSuccessful(true)
-          setMessage(`Added ${newName || response.name}`)
+          setMessage(`Updated ${newName || response.name}`)
           setSuccess(true)
           setNewName('')
           setNewPhoneNumber('')
@@ -91,13 +92,13 @@ const App = () => {
           console.error(error)
         })
     } 
-console.log("nameinphonebook", nameInPhoneBook[0])
+
 
   if (!nameInPhoneBook[0]) {
-    services.create(noteObject).then(response => {
+    await services.create(noteObject).then(response => {
         console.log("created", response)
-        setPostSuccessful(true)
         setMessage(`Added ${response.name}`)
+        setPostSuccessful(true)
         setSuccess(true)
         setNewName('')
         setNewPhoneNumber('')
@@ -130,13 +131,20 @@ console.log("nameinphonebook", nameInPhoneBook[0])
   }
 
   const handleDeletedNumber = (name, id) => {
+    
     let deletePrompt = window.confirm(`Delete ${name}?`)
       if (deletePrompt) {
+        
         services.deleteNumber(id).then(response => {
+          
           console.log("deleted", response)
           setPostSuccessful(true)
+          setMessage(`${name} deleted.`)
+          
         }).catch((error) => {
+          
         setMessage(`${name} has already been deleted from phonebook.`)
+        
         console.error(error)
       })
 
