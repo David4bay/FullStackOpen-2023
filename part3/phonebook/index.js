@@ -39,10 +39,9 @@ app.get('/', (request, response) => {
 
 app.get('/api/persons', async (request, response) => {
     await PhonebookEntry.find({}).then((data) => {
+        console.log(data)
         if (!data) {
-            return response.status(404).json({
-                message: 'No entry in phonebook'
-            })
+            return response.json([])
         }
         response.json(data)
     })
@@ -78,28 +77,31 @@ app.get('/api/persons/:id', async (request, response) => {
 })
 
 app.put('/api/persons/:id', async (request, response) => {
+    const { id } = request.params; 
 
-    const { id } = request.body
+    const newName = request.body.name.trim();
 
-    const newName = request.body.name.trim()
-    
-    const newNumber = { name: newName, number: request.body.number, id: id || Math.floor(Math.random() * 10000 + 1)  }
+    const newNumber = { name: newName, number: request.body.number, id: id || Math.floor(Math.random() * 10000 + 1) };
 
-    await PhonebookEntry.find({ number: request.body.number }).then((person) => {
-        if (!person) {
+        const personExists = await PhonebookEntry.findOne({ id: id });
 
-            return response.status(404).json({ error: 'Sorry, username already exists.' })
-            
+        if (!personExists) {
+            return response.status(404).json({ error: 'Sorry, username does not exist.' });
         }
 
-    PhonebookEntry(newNumber).save().then((person) => {
-        response.json({ message: `replaced`})
-    }).catch((e) => {
-        console.log(e)
-        response.status(404).json({ error: 'Something went wrong'})
-    })
-    })
-})
+        const updateNumber = await PhonebookEntry.updateOne({ id: personExists.id }, { ...newNumber }).then((person) => {
+            if (person) {
+
+                return response.json({ name: newName });
+            }
+        })
+
+        if (!updateNumber) {
+            
+            response.status(404).json({ error: 'Could not update.' })
+        }
+});
+
 
 app.post('/api/persons', async (request, response) => {
 
@@ -123,7 +125,7 @@ app.post('/api/persons', async (request, response) => {
 
         PhonebookEntry({...newNumber}).save().then((data) => {
 
-            response.status(201).json({ message: `${newNumber.name} added`})
+            response.status(201).json({ message: `${newNumber.name} added`, name: newNumber.name})
 
         }).catch((e) => {
 
@@ -141,13 +143,15 @@ app.delete('/api/persons/:id', async (request, response) => {
         return response.status(404).json({ error: 'Invalid number'})
     }
 
-        await PhonebookEntry.find({ id }).then((person) => {
+    let person
+
+     person = await PhonebookEntry.find({ id }).then((person) => {
 
             if (!person) {
                 return response.status(404).json({ error: 'Could not find number, are you sure it exists?'})
             }
             PhonebookEntry.deleteOne({ id }).then((entry) => {
-                return response.json(entry)
+                return response.json({ message: `${person.name} deleted`})
             })
         }).catch((e) => {
             response.status(404).json({ error: 'Something went wrong.'})
