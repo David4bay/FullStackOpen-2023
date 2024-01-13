@@ -103,10 +103,11 @@ const App = () => {
         setNewName('')
         setNewPhoneNumber('')
       }).catch((error) => {
-        setMessage(`Unable to create ${noteObject.name} as new contact`)
+        // setMessage(`Unable to create ${noteObject.name} as new contact`) former way we accounted for errors
+        setMessage(error.response.data.message || `Unable to create ${noteObject.name} as new contact`)
         setSuccess(false)
         setPostSuccessful(true)
-        console.error(error)
+        console.log(error)
       })
   }
   }
