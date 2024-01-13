@@ -7,10 +7,10 @@ const url = `mongodb+srv://${process.env.MONGO_USER}:${encodeURIComponent(proces
 console.log('connecting to', url)
 
 mongoose.connect(url).then(result => {
-    console.log('connected to MongoDB')
-  }).catch((error) => {
-    console.log('error connecting to MongoDB:', error.message)
-  })
+  console.log('connected to MongoDB')
+}).catch((error) => {
+  console.log('error connecting to MongoDB:', error.message)
+})
 
 const noteSchema = new mongoose.Schema({
   content: {
