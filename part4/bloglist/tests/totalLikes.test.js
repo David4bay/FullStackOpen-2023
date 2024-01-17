@@ -14,7 +14,9 @@ describe('likes test', () => {
   ]
 
   test('when list has only one blog, equals the likes of that', () => {
-    expect(totalLikes(listWithOneBlog)).toEqual(5)
+
+    const result = totalLikes(listWithOneBlog)
+    expect(result).toEqual(5)
   })
 
   it('should sum all likes', () => {
@@ -70,7 +72,9 @@ describe('likes test', () => {
       }
     ]
 
-    expect(totalLikes(blogs)).toEqual(36)
+    const result = totalLikes(blogs)
+
+    expect(result).toEqual(36)
   })
 
 
