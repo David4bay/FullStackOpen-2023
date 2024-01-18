@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
-
+const config = require('../utils/config')
 mongoose.set('strictQuery', false)
 
-const url = `mongodb+srv://${process.env.MONGO_USER}:${encodeURIComponent(process.env.MONGO_PASS)}@cluster0.7fmaegp.mongodb.net/noteApp?retryWrites=true&w=majority`
+const url = config.MONGODB_URI
 
 console.log('connecting to', url)
 

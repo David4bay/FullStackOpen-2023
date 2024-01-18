@@ -1,4 +1,4 @@
-GET http://localhost:3001/api/notes/4
+GET http://localhost:3001/api/notes/
 
 ###
 
@@ -9,3 +9,7 @@ Content-Type: application/json
     "content": "Ensure that everything still works",
     "important": true
 }
+
+###
+
+DELETE http://localhost:3001/api/notes/65a7df4c06cd431bf9edf871
