@@ -4,11 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
     "lint": "eslint . --fix",
     "server": "nodemon index.js",
-    "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "test": "cross-env NODE_ENV=test jest --detectOpenHandles --verbose --runInBand",
+    "globalTeardown": "./tests/teardown.js"
   },
   "author": "David Bayode",
   "license": "MIT",
@@ -20,6 +21,8 @@
     "nodemon": "^3.0.2"
   },
   "devDependencies": {
-    "eslint": "^8.56.0"
+    "cross-env": "^7.0.3",
+    "eslint": "^8.56.0",
+    "supertest": "^6.3.4"
   }
 }
