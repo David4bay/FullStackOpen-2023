@@ -13,4 +13,19 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:3003/api/blogs/all 
+DELETE http://localhost:3003/api/blogs/all
+
+###
+PUT http://localhost:3003/api/blogs/65aade0426602329cf44cc60
+Content-Type: application/json
+
+{
+    "id": "65a9806f906e1807043fbf08",
+    "title": "FullStackOpen is awesome!",
+    "author": "Davihgjd Bayode",
+    "url": "exampgfhgle.com",
+    "likes": "987654321"
+}
+
+###
+DELETE http://localhost:3003/api/blogs/65aace6109160a3aabd95622
