@@ -1,12 +1,16 @@
-GET http://localhost:3003/api/blogs
+GET http://localhost:3003/api/blogs/
 
 ###
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
 
 {
+    "id": "32947487492344033943",
     "title": "FullStackOpen is awesome!",
     "author": "David Bayode",
     "url": "example.com",
     "likes": "987654321"
 }
+
+###
+DELETE http://localhost:3003/api/blogs/all 
