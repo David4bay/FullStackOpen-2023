@@ -17,4 +17,12 @@ blogRouter.post('/', (request, response, next) => {
   }).catch(error => next(error))
 })
 
+blogRouter.delete('/all', async (request, response, next) => {
+  Blog.deleteMany({}).then(() => {
+    response.status(200).json({
+      message: 'All blogs deleted'
+    })
+  }).catch((error) => next(error))
+})
+
 module.exports = blogRouter
