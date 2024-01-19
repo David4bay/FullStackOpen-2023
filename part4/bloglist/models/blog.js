@@ -1,5 +1,6 @@
 require('dotenv').config()
 const mongoose = require('mongoose')
+mongoose.Types.ObjectId.isValid('all')
 const config = require('../utils/config')
 const logger = require('../utils/logger')
 
@@ -25,6 +26,7 @@ const blogSchema = new mongoose.Schema({
     default: 0
   }
 })
+
 
 blogSchema.set('toJSON', {
   transform: (document, returnedObject) => {
