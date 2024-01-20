@@ -1,12 +1,13 @@
 GET http://localhost:3001/api/notes/
 
 ###
-POST http://localhost:3001/api/notes
+POST http://localhost:3001/api/notes/
 Content-Type: application/json
 
 {
     "content": "Ensure that everything still works",
-    "important": true
+    "important": true,
+    "userId": "65aba4f47945f36a99dc3feb"
 }
 
 ###
