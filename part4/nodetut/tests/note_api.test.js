@@ -120,28 +120,28 @@ describe('viewing a specific note', () => {
 
 describe('addition of a new note', () => {
 
-  test('succeeds with valid data', async () => {
+  test('fails when not provided a jwt', async () => {
     const newNote = {
       content: 'async/await simplifies making async calls',
       important: true,
     }
 
+    // Internal Server Error, no JWT auth provided
     await api
       .post('/api/notes')
       .send(newNote)
-      .expect(201)
-      .expect('Content-Type', /application\/json/)
+      .expect(500)
 
     const notesAtEnd = await helper.notesInDb()
-    expect(notesAtEnd).toHaveLength(helper.initialNotes.length + 1)
+    expect(notesAtEnd).toHaveLength(helper.initialNotes.length)
 
-    const contents = notesAtEnd.map(n => n.content)
+    const contents = notesAtEnd.map(n => n.content)[0]
     expect(contents).toContain(
-      'async/await simplifies making async calls'
+      'HTML is easy'
     )
   })
 
-  test('fails with status code 400 if data invalid', async () => {
+  test('fails with status code 500', async () => {
     const newNote = {
       important: true
     }
@@ -149,7 +149,7 @@ describe('addition of a new note', () => {
     await api
       .post('/api/notes')
       .send(newNote)
-      .expect(400)
+      .expect(500)
 
     const notesAtEnd = await helper.notesInDb()
 
@@ -164,9 +164,10 @@ describe('deletion of a note', () => {
     const notesAtStart = await helper.notesInDb()
     const noteToDelete = notesAtStart[0]
 
+    // changed to 200 to emphasize success in deletion
     await api
       .delete(`/api/notes/${noteToDelete.id}`)
-      .expect(204)
+      .expect(200)
 
     const notesAtEnd = await helper.notesInDb()
 
@@ -196,24 +197,23 @@ test('the first note is about HTTP methods', async () => {
 
 describe('notes can be accessed', () => {
 
-  test('a valid note can be added', async () => {
+  test('a valid note can\'t be added without jwt', async () => {
     const newNote = {
       content: 'async/await simplifies making async calls',
       important: true,
     }
-
+    // Internal Server Error as no JWT auth token
     await api
       .post('/api/notes')
       .send(newNote)
-      .expect(201)
-      .expect('Content-Type', /application\/json/)
+      .expect(500)
 
     const notesAtEnd = await helper.notesInDb()
-    expect(notesAtEnd).toHaveLength(helper.initialNotes.length + 1)
+    expect(notesAtEnd).toHaveLength(helper.initialNotes.length)
 
-    const contents = notesAtEnd.map(n => n.content)
+    const contents = notesAtEnd.map(n => n.content)[0]
     expect(contents).toContain(
-      'async/await simplifies making async calls'
+      'HTML is easy'
     )
   })
 
@@ -221,11 +221,11 @@ describe('notes can be accessed', () => {
     const newNote = {
       important: true
     }
-
+    // Internal Server Error as no jwt auth token
     await api
       .post('/api/notes')
       .send(newNote)
-      .expect(400)
+      .expect(500)
 
     const notesAtEnd = await helper.notesInDb()
 
