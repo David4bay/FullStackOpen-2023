@@ -12,10 +12,10 @@ const getTokenFrom = request => {
   return null
 }
 
-notesRouter.get('/', (request, response) => {
-  Note.find({}).then(notes => {
-    response.json(notes)
-  })
+notesRouter.get('/', async (request, response) => {
+  const notes = await Note.find({}).populate('user', { username: 1, name: 1 })
+
+  response.status(200).json(notes)
 })
 
 notesRouter.get('/:id', async (request, response) => {
@@ -46,21 +46,8 @@ notesRouter.post('/', async (request, response) => {
   user.notes = user.notes.concat(savedNote.id)
   await user.save()
 
-  response.json(savedNote)
+  response.status(201).json(savedNote)
 })
-
-// notesRouter.post('/', async (request, response) => {
-//   const body = request.body
-
-//   const note = new Note({
-//     content: body.content,
-//     important: body.important || false,
-//   })
-
-
-//   const savedNote = await note.save()
-//   response.status(201).json(savedNote)
-// })
 
 notesRouter.delete('/:id', async (request, response) => {
 

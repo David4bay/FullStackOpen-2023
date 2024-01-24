@@ -160,7 +160,7 @@ describe('addition of a new note', () => {
 describe('deletion of a note', () => {
 
 
-  test('succeeds with status code 204 if id is valid', async () => {
+  test('succeeds with status code 200 if id is valid', async () => {
     const notesAtStart = await helper.notesInDb()
     const noteToDelete = notesAtStart[0]
 
@@ -217,7 +217,7 @@ describe('notes can be accessed', () => {
     )
   })
 
-  test('note without content is not added', async () => {
+  test('note without content and jwt is not added', async () => {
     const newNote = {
       important: true
     }
