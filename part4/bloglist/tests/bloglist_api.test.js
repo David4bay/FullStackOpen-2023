@@ -144,7 +144,6 @@ test('create and edit an already existing blog', async () => {
 
 test('no likes defaults to 0', async () => {
 
-    
   const user = await User.findOne({ username: 'Davidbay' })
 
   const response = await api
@@ -172,6 +171,26 @@ test('handle empty title or url when new blog is added', async () => {
   expect(response.body.error).toContain('url')
 })
 
+test('can create and delete a blog', async () => {
+
+  const user = await User.findOne({ username: 'Davidbay' })
+
+  const response = await api
+                          .post('/api/blogs')
+                          .set({ Authorization: token })
+                          .send({
+                          url: 'exampledfdf.com',
+                          title: 'FullStackOpen is awesome!',
+                          author: 'David Bayfdfode',
+                          userId: user.id,
+  })
+
+  await api.delete(`/api/blogs/${response.body.id}`)
+           .set({ Authorization: token })
+           .expect(204)
+}, 100000)
+
+  
 
 })
 

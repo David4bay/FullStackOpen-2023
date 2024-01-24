@@ -10,7 +10,8 @@ usersRouter.get('/', async (request, response) => {
 
 usersRouter.post('/', async (request, response) => {
   const { username, name, password } = request.body
-
+  if (username.length < 3 || password.length < 3) return response.status(404).json({ error: 'Password and Username must be longer than 3.' })
+  if (!username || !password) return response.status(404).json({ error: 'Invalid Username/Password' })
   const saltRounds = 10
   const passwordHash = await bcrypt.hash(password, saltRounds)
 
@@ -29,7 +30,7 @@ usersRouter.post('/all', async (request, response) => {
   const usersDeleted = await User.deleteMany({})
 
   if (!usersDeleted) return response.status(404).json({ error: 'Something went wrong' })
-  return response.status(200).json({ message: 'successful' })
+  return response.status(204).json({ message: 'successful' })
 })
 
 module.exports = usersRouter

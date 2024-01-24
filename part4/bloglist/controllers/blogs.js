@@ -15,7 +15,7 @@ blogRouter.get('/:id', async (request, response) => {
   const blogId = request.params.id
 
   const blog = await Blog.findById(blogId).populate('userId')
-  if (!blog) return response.staus(404).json({ error: 'blog doesn\'t exist' })
+  if (!blog) return response.status(404).json({ error: 'blog doesn\'t exist' })
 
   return response.status(200).json(blog)
 })
@@ -23,14 +23,15 @@ blogRouter.get('/:id', async (request, response) => {
 blogRouter.post('/', async (request, response) => {
 
   const body = request.body
-  console.log('body from blogs post route', body)
+
   const token = request.token.startsWith('Bearer ') ? request.token.toString().replace('Bearer', '').trim() :  request.token
-  console.log('token from blogs post route', token)
+
   const decodedToken = await jwt.verify(token, process.env.SECRET)
-  console.log('decoded token from blogs router', decodedToken)
+  
   if (!decodedToken) {
     return response.status(401).json({ error: 'token invalid' })
   }
+
   let user = await User.findById(decodedToken.id)
 
   const blog = new Blog({
@@ -69,15 +70,26 @@ blogRouter.put('/:id', async (request, response) => {
 })
 
 blogRouter.delete('/:id', async (request, response) => {
-  const blogID = request.params.id
+
+  const blogId = request.params.id
+  const blog = await Blog.findById(blogId).populate('userId')
 
   const decodedToken = jwt.verify(request.token, process.env.SECRET)
+
   if (!decodedToken) {
     return response.status(401).json({ error: 'token invalid' })
   }
-  await Blog.deleteOne({ _id: blogID }).then((data) => {
-    response.status(200).json(data)
-  })
+  
+  if (!blog) {
+    return response.status(404).json({ error: 'Blog does not exist' })
+  }
+
+  if (blog.userId._id.toHexString() === decodedToken.id) {
+      return await Blog.findByIdAndDelete(blogId).then((data) => {
+      response.status(204).json(data)
+    })
+  }
+    return response.status(401).json({ error: 'User is not allowed to delete this document' })
 })
 
 
