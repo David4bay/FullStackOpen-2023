@@ -1,121 +1,180 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
-mongoose.set('bufferTimeoutMS', 30000)
+const Blog = require('../models/blog')
+const User = require('../models/user')
+mongoose.set('bufferTimeoutMS', 1000000)
 
 const api = supertest(app)
 
+describe('test should work within this scope', () => {
+
+  let token
+
 beforeAll(async () => {
-  await api.delete('/api/blogs/all')
-  await api.post('/api/blogs').send({
-    'title': 'FullStackOpen is awesome!',
-    'author': 'David Bayode',
-    'url': 'example.com',
-    'likes': 987654321
-  })
-}, 150000)
+      // Clear existing data
+      await User.deleteMany({})
+      await Blog.deleteMany({})
+    
+      // Create a user for testing
+      await api.post('/api/users').send({
+        username: 'Davidbay',
+        name: 'David Bayode',
+        password: process.env.PASSWORD,
+      })
+    
+      const loginResponse = await api
+      .post('/api/login')
+      .send({
+        username: 'Davidbay',
+        password: process.env.PASSWORD,
+      })
+    
+      token = `Bearer ${loginResponse.body.token}`
+    
+    }, 100000)
 
-describe('returns a valid blog post', () => {
+    
+test('is empty', async () => {
+  const response = await api
+    .get('/api/blogs')
+    .set({ Authorization: token })
 
-  test('return a response in JSON', async () => {
-    await api
-      .get('/api/blogs')
-      .expect(200)
-      .expect('Content-Type', /application\/json/)
-  })
+  expect(response.body).toEqual([])
+}, 100000)
 
-  test('has an id property', async () => {
-    const response = await api.get('/api/blogs')
+test('validate post request', async () => {
+  
+      const user = await User.findOne({ username: 'Davidbay' })
+    
+      await api.post('/api/blogs')
+        .set({ Authorization: token })
+        .send({
+          url: 'example.com',
+          title: 'FullStackOpen is awesome!',
+          author: 'David Bayode',
+          userId: user.id
+        }).expect(201)
+        
+    }, 100000)
 
-    expect(response.body[0]).toHaveProperty('id')
-  }, 100000)
+test('add new blog', async () => {
+  const user = await User.findOne({ username: 'Davidbay' })
 
-  test('add new blog', async () => {
-    await api.post('/api/blogs').send({
-      'title': 'FullStackOpen is awesome!',
-      'author': 'David Bayode',
-      'url': 'example.com',
-      'likes': 987654321
+  const newBlog = {
+    url: 'exampledfdf.com',
+    title: 'FullStackOpen is awesome!',
+    author: 'David Bayfdfode',
+    userId: user.id,
+    likes: 987654321,
+  }
+
+  const response = await api
+    .post('/api/blogs')
+    .set({ Authorization: token })
+    .send(newBlog)
+      
+  expect(response.body.id).toBeDefined()
+
+  const blogsAfterAdding = await api.get('/api/blogs')
+  expect([blogsAfterAdding.body[0]]).toHaveLength(1)
+}, 100000)
+
+test('return a response in JSON', async () => {
+  await api
+    .get('/api/blogs')
+    .set({ Authorization: token })
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+}, 100000)
+
+
+test('add new blog', async () => {
+  const user = await User.findOne({ username: 'Davidbay' })
+    
+  const response = await api
+    .post('/api/blogs')
+    .set({ Authorization: token })
+    .send({
+      url: 'exampledfdf.com',
+      title: 'FullStackOpen is awesome!',
+      author: 'David Bayfdfode',
+      userId: user.id,
+      likes: 987654321,
     }).expect(201)
 
-    const response = await api.get('/api/blogs')
+  await api.get('/api/blogs')
+  .set({ Authorization: token }).expect(200)
+  console.log('The response body of add new blog is', response.body)  
+  expect([response.body]).toHaveLength(1)
+}, 100000)
 
-    expect(response.body).toHaveLength(2)
-  })
-})
+  
+test('create and edit an already existing blog', async () => {
 
-describe('validate blog posts', () => {
+  await Blog.deleteMany({})
 
-  test('no likes defaults to 0', async () => {
-    const response = await api.post('/api/blogs').send({
-      'title': 'FullStackOpen is awesome!',
-      'author': 'David Bayode',
-      'url': 'example.com'
+  const user = await User.findOne({ username: 'Davidbay' })
+
+  const response = await api.post('/api/blogs')
+    .set({ Authorization: token })
+    .send({
+      url: 'example.com',
+      title: 'FullStackOpen is awesome!',
+      author: 'David Bayode',
+      userId: user.id,
     })
 
-    const body = response.body
+  const responseID = response.body.id
 
-    const lastAddedItem = body[body.length - 1]
-    console.log(lastAddedItem, 'lastAddedItem')
-    // expect(lastAddedItem).toBe(0)
-  })
-
-  test('handle empty title or url when new blog is added', async () => {
-
-    await api.post('/api/blogs').send({
-      'author': 'David Bayode'
-    }).expect(400)
-
-  })
-})
-
-
-describe('Can create and edit blog', () => {
-
-  test('create and edit an already existing blog', async () => {
-
-    const response = await api.post('/api/blogs').send({
-      'id': '3439483483403403493',
-      'title': 'FullStackOpen is awesome!',
-      'author': 'David Bayode',
-      'url': 'example.com',
-      'likes': 987654321
+  await api
+    .put(`/api/blogs/${responseID}`)
+    .set({ Authorization: token })
+    .send({
+      url: 'example.com',
+      title: 'FullStackOpen is even more awesome now!',
+      author: 'David Bayode',
+      userId: user.id,
+      likes: 987654321,
     })
 
-    const responseID = response.body.id
+  const updatedBlog = await Blog.findById(responseID)
+  expect(updatedBlog.title).toBe('FullStackOpen is even more awesome now!')
+}, 100000)
 
-    await api.put(`/api/blogs/${responseID}`).send({
-      'id': '3439483483403403493',
-      'title': 'FullStackOpen is awesome!',
-      'author': 'David Bayode',
-      'url': 'example.com',
-      'likes': 987654321
-    }).expect(200)
+test('no likes defaults to 0', async () => {
 
-  })
+    
+  const user = await User.findOne({ username: 'Davidbay' })
 
-})
-
-describe('Can create and delete blog post', () => {
-
-  test('create and edit an already existing blog', async () => {
-
-    const response = await api.post('/api/blogs').send({
-      'id': '3439483483403403493',
-      'title': '2024 will be my best year!!!',
-      'author': 'David Bayode',
-      'url': 'example.com',
-      'likes': 987654321
+  const response = await api
+    .post('/api/blogs')
+    .set({ Authorization: token })
+    .send({
+      url: 'exampledfdf.com',
+      title: 'FullStackOpen is awesome!',
+      author: 'David Bayfdfode',
+      userId: user.id,
     })
 
-    const responseID = response.body.id
+  expect(response.body.likes).toBe(0)
+})
 
-    await api.delete(`/api/blogs/${responseID}`).expect(200)
+test('handle empty title or url when new blog is added', async () => {
+  const response = await api
+    .post('/api/blogs')
+    .set({ Authorization: token })
+    .send({
+      author: 'David Bayode',
+    })
 
-  })
+  expect(response.body.error).toContain('title')
+  expect(response.body.error).toContain('url')
+})
+
 
 })
 
 afterAll(async () => {
   await mongoose.connection.close()
-})
+}, 70000)

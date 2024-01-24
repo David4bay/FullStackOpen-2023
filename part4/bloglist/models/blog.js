@@ -11,20 +11,24 @@ mongoose.connect(config.MONGODB_URI).then(() => {
 })
 
 const blogSchema = new mongoose.Schema({
-  id: String,
+  url: {
+    type: String,
+    required: true
+  },
   title: {
     type: String,
     required: true
   },
   author: String,
-  url: {
-    type: String,
-    required: true
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
   },
   likes: {
     type: Number,
     default: 0
-  }
+  },
+  id: String
 })
 
 
