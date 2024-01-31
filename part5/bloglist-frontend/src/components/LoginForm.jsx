@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import service from '../services/blogs'
 
-const Form = ({ setUser, user }) => {
+const LoginForm = ({ setUser, user, setNotification }) => {
 
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
+    const [displayForm, setDisplayForm] = useState(false)
     
   
     const handleInputChange = (e) => {
@@ -24,15 +25,20 @@ const Form = ({ setUser, user }) => {
         password
       }
 
-      return service.login(data, setUser)
+      return service.login(data, setUser, setNotification)
+    }
+
+    const displayFormHandler = (e) => {
+      setDisplayForm(!displayForm)
     }
   
     if (!user || user === null) {
-      return (
+      return !displayForm ? <button type="button" onClick={displayFormHandler}>Show Log In</button> : (
         <>
         <h1>log in to application</h1>
         <form onSubmit={handleFormSubmit}>
           <div>
+            <div style={{marginBottom: '10px'}}>
             <label htmlFor="username">username</label>
             <input 
             type="text" 
@@ -43,7 +49,8 @@ const Form = ({ setUser, user }) => {
             onChange={handleInputChange} 
             autoComplete="true"
             />
-            <br/>
+            </div>
+            <div>
             <label htmlFor="password">password</label>
             <input 
             type="password" 
@@ -54,8 +61,10 @@ const Form = ({ setUser, user }) => {
             onChange={handleInputChange}
             autoComplete="true" 
             />
+            </div>
           </div>
-          <input type="submit" value="login" />
+          <input type="submit" value="login" /><br/>
+          <button type="button" onClick={displayFormHandler}>Hide Login</button>
         </form>
         </>
       )
@@ -64,4 +73,4 @@ const Form = ({ setUser, user }) => {
     return null
   }
 
-export default Form
+export default LoginForm

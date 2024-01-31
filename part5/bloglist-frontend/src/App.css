@@ -1,7 +1,13 @@
-input[type="submit"], button {
+input[type="submit"], button:not(.create-button) {
     background-color: transparent;
-    border: none;
+    border: 1px solid grey;
     border-radius: 5px;
-    box-shadow: 0px 0px 0px 1px grey;
     margin-left: 5px;
+}
+
+.create-button {
+    margin-top: 8px;
+    background-color: transparent;
+    border: 1px solid grey;
+    border-radius: 5px;
 }
