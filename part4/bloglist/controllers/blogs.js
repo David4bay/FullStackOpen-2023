@@ -24,8 +24,8 @@ blogRouter.post('/', async (request, response) => {
 
   const body = request.body
 
-  const token = request.token.startsWith('Bearer ') ? request.token.toString().replace('Bearer', '').trim() :  request.token
-
+  const token = request.token?.includes('Bearer ') ? request.token.toString().replace('Bearer', '').trim() :  request.token
+  console.log("token sent as post request to blog router", token)
   const decodedToken = await jwt.verify(token, process.env.SECRET)
   
   if (!decodedToken) {

@@ -6,7 +6,6 @@ const tokenSetter = token => {
 
 const tokenGetter = () => {
     const getUser = localStorage.getItem(USER)
-    console.log("this is the token returned from tokenGetter service", getUser)
     return getUser ? JSON.parse(getUser) : null
 }
 
