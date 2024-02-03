@@ -25,7 +25,10 @@ const LoginForm = ({ setUser, user, setNotification }) => {
         password
       }
 
-      return service.login(data, setUser, setNotification)
+      return service.login(data).then((response) => {
+        setUser(response.data?.username)
+        setNotification('Logged in successfully')
+      })
     }
 
     const displayFormHandler = (e) => {

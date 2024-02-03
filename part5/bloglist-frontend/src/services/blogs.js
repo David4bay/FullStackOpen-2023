@@ -1,43 +1,31 @@
-import axios from 'axios'
 import tokenHelper from './tokenHelper'
+import axios from 'axios'
 import { baseUrl, registerUrl, loginUrl, postBlogUrl } from './data'
 
-const getAll = (setUser, setBlogs) => {
 
-  const token = tokenHelper.tokenGetter()
-  console.log("this is the token returned", token)
-  const request = axios.get(baseUrl, { Authorization: `Bearer ${token?.token}` })
+const getAll = async (setUser, setBlogs) => {
 
-  return request.then(({data}) => {
-    if (!token) return null
+  const auth = tokenHelper.tokenGetter()
+  
+  console.log("this is the token returned", auth)
 
-    if (token) {
-      console.log(data)
-      setUser(token?.username)
-      console.log("these are the blogs returned", data)
-      setBlogs(data)
-    }
+  const response = await axios.get(baseUrl, { headers: { 'Authorization': `Bearer ${auth?.token}` } })
 
-  })
-
+  return response
 }
 
-const login = async (userData, setUser, setNotification) => {
+const login = async (userData) => {
 
   console.log("user data from login service", userData)
 
-  let response
+  const response = await axios.post(loginUrl, userData)
 
-  try {
-    response = await axios.post(loginUrl, userData)
-    console.log("response data from axios for login", response)
-  } catch (err) {
-    return setNotification(`wrong username or password`)
-  }
-  console.log("frontend token info", response?.data)
-  tokenHelper.tokenSetter(response?.data)
-  setNotification('Logged in successfully')
-  setUser(response.data?.username)
+  tokenHelper.tokenSetter(await response?.data)
+
+  console.log("response data from axios for login", response)
+
+  return response
+
 }
 
 const createBlog = async (data) => {
@@ -47,4 +35,26 @@ const createBlog = async (data) => {
   return await axios.post(postBlogUrl, {...data}, { withCredentials: true, headers: { 'Authorization': `Bearer ${auth.token}` } })
 }
 
-export default { getAll, login, createBlog }
+const editBlog = async (data) => {
+
+  const auth = tokenHelper.tokenGetter()
+
+  const { id } = data
+
+  const response = await axios.put(`${postBlogUrl}/${id}`, data, { withCredentials: true, headers: { 'Authorization': `Bearer ${auth.token}` } })
+
+  return response
+}
+
+const deleteBlog = async (id) => {
+
+  const deleteBlogUrl = postBlogUrl
+
+  const auth = tokenHelper.tokenGetter()
+
+  const response = await axios.delete(`${deleteBlogUrl}/${id}`, { withCredentials: true, headers: { 'Authorization': `Bearer ${auth.token}`} })
+
+  return response
+}
+
+export default { getAll, login, createBlog, editBlog, deleteBlog }
