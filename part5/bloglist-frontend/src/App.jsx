@@ -10,6 +10,8 @@ import BlogList from './components/BlogList'
 import CreateBlogForm from './components/CreateBlogForm'
 import Home from './components/Home'
 import Notice from './components/Notice'
+import Togglable from './components/Togglable'
+import tokenHelper from './services/tokenHelper'
 
 const App = () => {
 
@@ -25,7 +27,12 @@ const App = () => {
   const [notification, setNotification] = useState('')
 
   useEffect(() => {
-    blogService.getAll(setUser, setBlogs)
+    const auth = tokenHelper.tokenGetter()
+    blogService.getAll(setUser, setBlogs).then(({data}) => {
+      console.log("data from blog", data)
+      setUser(auth?.username)
+      setBlogs(data)
+    })
     console.log("blogs in app", blogs) 
   }, [])
 
@@ -44,10 +51,15 @@ const App = () => {
   }, [notification])
 
   useEffect(() => {
-    !notification.includes('Failed') && !notification.includes('invalid') ? (
-      blogService.getAll(setUser, setBlogs)
+    const auth = tokenHelper.tokenGetter()
+    notification.includes('created') || notification.includes('failed') ? (
+      blogService.getAll(setUser, setBlogs).then(({data}) => {
+        setUser(auth?.username)
+        setBlogs(data)
+      })
     ) : null
-  }, [notification])
+  }, [])
+
 
   const logout = () => {
     localStorage.removeItem(USER)
@@ -70,13 +82,17 @@ const App = () => {
         user={user}
         logout={logout}
         />
+        <Togglable buttonLabel="create new blog">
         <CreateBlogForm 
         input={input}
         handleInput={handleInput}
         setNotification={setNotification}
         />
+        </Togglable>
         <BlogList 
         blogs={blogs} 
+        setBlogs={setBlogs}
+        setNotification={setNotification}
         />
       </div>
     )
