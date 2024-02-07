@@ -6,8 +6,8 @@ import { baseUrl, registerUrl, loginUrl, postBlogUrl } from './data'
 const getAll = async (setUser, setBlogs) => {
 
   const auth = tokenHelper.tokenGetter()
-  
-  console.log("this is the token returned", auth)
+
+  console.log('this is the token returned', auth)
 
   const response = await axios.get(baseUrl, { headers: { 'Authorization': `Bearer ${auth?.token}` } })
 
@@ -16,13 +16,13 @@ const getAll = async (setUser, setBlogs) => {
 
 const login = async (userData) => {
 
-  console.log("user data from login service", userData)
+  console.log('user data from login service', userData)
 
   const response = await axios.post(loginUrl, userData)
 
   tokenHelper.tokenSetter(await response?.data)
 
-  console.log("response data from axios for login", response)
+  console.log('response data from axios for login', response)
 
   return response
 
@@ -31,8 +31,8 @@ const login = async (userData) => {
 const createBlog = async (data) => {
 
   const auth = tokenHelper.tokenGetter()
-  console.log("auth in create blog service", auth)
-  return await axios.post(postBlogUrl, {...data}, { withCredentials: true, headers: { 'Authorization': `Bearer ${auth.token}` } })
+  console.log('auth in create blog service', auth)
+  return await axios.post(postBlogUrl, { ...data }, { withCredentials: true, headers: { 'Authorization': `Bearer ${auth.token}` } })
 }
 
 const editBlog = async (data) => {
@@ -52,7 +52,7 @@ const deleteBlog = async (id) => {
 
   const auth = tokenHelper.tokenGetter()
 
-  const response = await axios.delete(`${deleteBlogUrl}/${id}`, { withCredentials: true, headers: { 'Authorization': `Bearer ${auth.token}`} })
+  const response = await axios.delete(`${deleteBlogUrl}/${id}`, { withCredentials: true, headers: { 'Authorization': `Bearer ${auth.token}` } })
 
   return response
 }

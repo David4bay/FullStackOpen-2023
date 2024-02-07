@@ -25,4 +25,16 @@ usersRouter.post('/', async (request, response) => {
   response.status(201).json(savedUser)
 })
 
+usersRouter.delete('/:id', async (request, response) => {
+  const { id } = request.params
+
+  const responseData = await User.findByIdAndDelete(id)
+
+  if (responseData) {
+    const { data } = responseData
+    return response.status(204).json(data)
+  }
+  return response.status(404).json('Unable to delete user, check if this user exists')
+})
+
 module.exports = usersRouter
