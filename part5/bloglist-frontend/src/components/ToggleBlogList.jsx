@@ -1,7 +1,8 @@
+import PropTypes from 'prop-types'
 import { useState, forwardRef, useImperativeHandle } from 'react'
 
-const ToggleBlogList = forwardRef((props, ref) => {
-
+const ToggleBlogList = forwardRef((props, refs) => {
+    
     const [blogDetails, setBlogDetails] = useState(false)
 
     const blogList = { 
@@ -20,7 +21,7 @@ const ToggleBlogList = forwardRef((props, ref) => {
         setBlogDetails(!blogDetails)
     }
 
-    useImperativeHandle(ref, () => {
+    useImperativeHandle(refs, () => {
         return {
             toggleBlogView
         }
@@ -28,15 +29,20 @@ const ToggleBlogList = forwardRef((props, ref) => {
 
     return (
         <>
-        <div style={blogList}>
+        <div className="brief__BlogDetail" style={blogList}>
             {props.title} {props.author}
-            <button onClick={toggleBlogView}>{props.view}</button>
+            <button className="reveal__BlogBtn" onClick={toggleBlogView}>{props.view}</button>
         </div>
-        <div style={hideBlogList}>
+        <div className="full__BlogDetail" style={hideBlogList}>
             {props.children}
         </div>
         </>
     )
 })
+
+ToggleBlogList.propTypes = {
+    author: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired
+}
 
 export default ToggleBlogList

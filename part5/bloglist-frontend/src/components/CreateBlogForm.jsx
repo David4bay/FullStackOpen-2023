@@ -1,23 +1,9 @@
 import services from '../services/blogs'
 
 
-const CreateBlogForm = ({ input, handleInput, setNotification }) => {
+const CreateBlogForm = ({ input, handleInput, handleNewBlogSubmit }) => {
 
-    let { title, author, url } = input
-    
-    const handleNewBlogSubmit = (e) => {
-        e.preventDefault()
-
-        const data = { title, author, url }
-
-        services.createBlog(data).then((response) => {
-          console.log("response from create blog form service", response)
-          setNotification(`${response.data.title} created by ${response.data.author}`)
-        }).catch((e) => {
-        setNotification(e.response.data?.error)
-        console.log("error in create blog form service",e)
-    })
-    }
+  let { title, author, url } = input
 
     return (
         <form onSubmit={handleNewBlogSubmit} >

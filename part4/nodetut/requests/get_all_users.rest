@@ -5,7 +5,11 @@ POST http://localhost:3001/api/users/
 Content-Type: application/json
 
 {
-    "username": "root",
-    "name": "Superuser",
+    "username": "Matti Luukkainen",
+    "name": "Matti Luukkainen",
     "password": "salainen"
 }
+
+###
+DELETE http://localhost:3001/api/users/65c27813d0e32c84bc338f42
+Content-Type: application/json

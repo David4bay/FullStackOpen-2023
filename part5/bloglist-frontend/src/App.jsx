@@ -15,6 +15,16 @@ import tokenHelper from './services/tokenHelper'
 
 const App = () => {
 
+  const sortLikes = (a, b) => {
+    if (a.likes < b.likes) {
+      return 1
+    }
+    if (a.likes > b.likes) {
+      return -1
+    }
+    return 0
+  }
+
   const name = {
     title: '',
     author: '',
@@ -31,6 +41,7 @@ const App = () => {
     blogService.getAll(setUser, setBlogs).then(({data}) => {
       console.log("data from blog", data)
       setUser(auth?.username)
+      data = data.sort(sortLikes)
       setBlogs(data)
     })
     console.log("blogs in app", blogs) 
@@ -54,6 +65,7 @@ const App = () => {
     const auth = tokenHelper.tokenGetter()
     notification.includes('created') || notification.includes('failed') ? (
       blogService.getAll(setUser, setBlogs).then(({data}) => {
+        data = data.sort(sortLikes)
         setUser(auth?.username)
         setBlogs(data)
       })
@@ -69,6 +81,22 @@ const App = () => {
   const handleInput = (e) => {
     setInput((oldInput) => ({ ...oldInput, [e.target.name]: e.target.value }))
   }
+
+  const handleNewBlogSubmit = (e) => {
+    e.preventDefault()
+
+    let { title, author, url } = input
+
+    const data = { title, author, url }
+
+    services.createBlog(data).then((response) => {
+      console.log("response from create blog form service", response)
+      setNotification(`${response.data.title} created by ${response.data.author}`)
+    }).catch((err) => {
+    setNotification(err.response.data?.error)
+    console.log("error in create blog form service", err)
+})
+}
 
   if (user) {
     
@@ -86,7 +114,7 @@ const App = () => {
         <CreateBlogForm 
         input={input}
         handleInput={handleInput}
-        setNotification={setNotification}
+        handleNewBlogSubmit={handleNewBlogSubmit}
         />
         </Togglable>
         <BlogList 
