@@ -5,7 +5,7 @@ const LoginForm = ({ setUser, user, setNotification }) => {
 
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
-    const [displayForm, setDisplayForm] = useState(false)
+    const [displayForm, setDisplayForm] = useState(true)
     
   
     const handleInputChange = (e) => {
@@ -28,6 +28,8 @@ const LoginForm = ({ setUser, user, setNotification }) => {
       return service.login(data).then((response) => {
         setUser(response.data?.username)
         setNotification('Logged in successfully')
+      }).catch((err) => {
+        setNotification('wrong credentials')
       })
     }
 
@@ -66,7 +68,7 @@ const LoginForm = ({ setUser, user, setNotification }) => {
             />
             </div>
           </div>
-          <input type="submit" value="login" /><br/>
+          <input type="submit" id="login-button" value="Login" /><br/>
           <button type="button" onClick={displayFormHandler}>Hide Login</button>
         </form>
         </>

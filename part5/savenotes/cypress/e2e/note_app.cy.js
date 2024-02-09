@@ -62,4 +62,4 @@ describe('Note ', function() {
       .and('have.css', 'color', 'rgb(255, 0, 0)')
       .and('have.css', 'border-style', 'solid')
   })
-}
+})

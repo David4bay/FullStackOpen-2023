@@ -36,10 +36,11 @@ const Blog = ({ setBlogs, setNotification, blog }) => {
   const deleteButtonHandler = (blogs) => {
     
     const { id } = blogs
-    const confirm = windows.confirm(`Remove blog ${blogs.title} by ${blogs.author}`)
+    const confirm = process.env.NODE_ENV === 'test' ? true : window.confirm(`Remove blog ${blogs.title} by ${blogs.author}`)
     if (confirm) {
       return services.deleteBlog(id).then(({data}) => {
-        data.sort(sortLikes)
+        data ? data?.sort(sortLikes) : data = []
+        setBlogs(data)
         setNotification(`${blogs.title} by ${blogs.author} deleted`)
       })
     }
@@ -59,7 +60,7 @@ const Blog = ({ setBlogs, setNotification, blog }) => {
               <>
               <li>
               likes {likes.toString()}
-              <button type="button" onClick={() => likeButtonHandler(blog)}>like</button>
+              <button type="button" className="like__Button" onClick={() => likeButtonHandler(blog)}>like</button>
               </li>
                 </> : '' }
       {author ? <li>{author}</li> : '' }
