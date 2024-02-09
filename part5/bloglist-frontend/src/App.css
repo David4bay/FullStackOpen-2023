@@ -29,3 +29,17 @@ ul {
     margin: 0;
     padding: 0;
 }
+
+.error {
+    color: rgb(255, 0, 0);
+    border-style: solid;
+    background-color: grey;
+    border-color: rgb(255, 0, 0);;
+}
+
+.success {
+    color: rgb(0, 255, 0);
+    border-style: solid;
+    background-color: grey;
+    border-color: rgb(0, 255, 0);
+}
