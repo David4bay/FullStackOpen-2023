@@ -1,3 +1,10 @@
+import { createSlice } from '@reduxjs/toolkit'
+
+export const UPVOTE = 'UPVOTE'
+export const NEW_NOTE = 'NEW_NOTE'
+export const SORT = 'SORT'
+export const GET_STATE = 'GET_STATE'
+
 const anecdotesAtStart = [
   'If it hurts, do it more often',
   'Adding manpower to a late software project makes it later!',
@@ -17,13 +24,47 @@ const asObject = (anecdote) => {
   }
 }
 
+export const upvoter = (id) => {
+  return {
+    type: UPVOTE,
+    id
+  }
+}
+
+export const addNewNote = (newNote) => {
+  return {
+    type: NEW_NOTE,
+    note: newNote
+  }
+}
+
+export const getState = () => {
+  return {
+    type: GET_STATE
+  }
+}
+
 const initialState = anecdotesAtStart.map(asObject)
 
-const reducer = (state = initialState, action) => {
+const anecdoteReducer = (state = initialState, action) => {
   console.log('state now: ', state)
   console.log('action', action)
+
+  if (action.type === GET_STATE) {
+    return [...initialState]
+  }
+
+  if (action.type === UPVOTE) {
+    
+    
+    return [...state.slice(0, indexOfTopic), { id: action.id, content: state[indexOfTopic].content, votes: state[indexOfTopic].votes + 1 }, ...state.slice(indexOfTopic + 1)]
+  }
+
+  if (action.type === NEW_NOTE) {
+    return [...state, { id: getId(), content: action.note, votes: 0 }]
+  }
 
   return state
 }
 
-export default reducer
+export default anecdoteReducer
