@@ -1,49 +1,66 @@
 import '../App.css'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { addVote, setAnecdotes } from './reducers/anecdoteSlice'
 import AnecdoteList from './components/AnecdoteList'
 import AnecdoteForm from './components/AnecdoteForm'
 import AnecdotesFilter from './components/AnecdotesFilter'
-import { addVote } from './reducers/anecdoteSlice'
+import anecdoteService from './services/anecdotes'
 import Notification from './components/Notification'
+import { clearMessage, setMessage } from './reducers/notificationSlice'
 
 const App = () => {
 
-  const [message, setMessage] = useState(null)
+  // const [message, setMessage] = useState(null) // notifications now dispatched via reduxtoolkit
   
+  useEffect(() => {
+    anecdoteService.getAll().then(anecdotes => {
+      console.log("anecdotes", anecdotes)
+      dispatch(setAnecdotes(anecdotes))
+    })
+
+  }, [])
+
   let anecdotes = useSelector(state => state.anecdotes)
 
+  let message = useSelector((state) => state.notification)
+  
   const dispatch = useDispatch()
   
-  const vote = (id) => {
-
-    console.log('vote', id)
-
-    let anecdoteIdx = anecdotes.findIndex((anecdote) => anecdote.id === id)
-
-    setMessage(`You voted for ${anecdotes[anecdoteIdx].content}`)
-
-    dispatch(addVote(id))
-  }
-
   useEffect(() => {
     let timeout
 
-    if (message) {
+    if (message?.messageValue) {
       timeout = setTimeout(() => {
-        setMessage('')
-      }, 5000)
+        dispatch(clearMessage())
+      }, message.timeout)
     }
 
     return () => clearTimeout(timeout)
   })
 
+
+
+  const vote = (id) => {
+    console.log('vote', id)
+
+    let anecdoteIdx = anecdotes.findIndex((anecdote) => anecdote.id === id)
+
+    let focusAnecdote = anecdotes[anecdoteIdx]
+
+    dispatch(setMessage({ message: `You voted for ${focusAnecdote.content}`, time: 5000}))
+
+    anecdoteService.upVote(focusAnecdote, focusAnecdote.id)
+
+    dispatch(addVote(id))
+  }
+
   return (
     <div>
       <h2>Anecdotes</h2>
-      <Notification message={message} />
+      <Notification />
       <AnecdotesFilter />
-      <AnecdoteList anecdotes={anecdotes} vote={vote} />
+      <AnecdoteList vote={vote} />
       <AnecdoteForm />
     </div>
   )

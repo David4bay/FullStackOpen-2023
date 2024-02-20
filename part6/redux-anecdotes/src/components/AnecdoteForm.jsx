@@ -1,11 +1,13 @@
 import { useDispatch } from "react-redux"
-import { addNewNote } from "../reducers/anecdoteReducer"
+import { addAnecdote } from "../reducers/anecdoteSlice"
+import anecdoteService from '../services/anecdotes'
+// import { addNewNote } from "../reducers/anecdoteReducer"
 
 const AnecdoteForm = () => {
 
     const dispatch = useDispatch()
 
-    const handleNewNote = (e) => {
+    const handleNewNote = async (e) => {
         e.preventDefault()
         
         const formData = new FormData(e.target)
@@ -16,7 +18,9 @@ const AnecdoteForm = () => {
             return
         }
 
-        dispatch(addNewNote(newNote))
+        const newAnecdote = await anecdoteService.createNew(newNote)
+
+        dispatch(addAnecdote(newAnecdote))
 
         const input = document.querySelector('#new_note')
 
