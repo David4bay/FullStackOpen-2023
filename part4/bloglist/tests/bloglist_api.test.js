@@ -176,13 +176,13 @@ test('can create and delete a blog', async () => {
   const user = await User.findOne({ username: 'Davidbay' })
 
   const response = await api
-                          .post('/api/blogs')
-                          .set({ Authorization: token })
-                          .send({
-                          url: 'exampledfdf.com',
-                          title: 'FullStackOpen is awesome!',
-                          author: 'David Bayfdfode',
-                          userId: user.id,
+    .post('/api/blogs')
+    .set({ Authorization: token })
+    .send({
+    url: 'exampledfdf.com',
+    title: 'FullStackOpen is awesome!',
+    author: 'David Bayfdfode',
+    userId: user.id,
   })
 
   await api.delete(`/api/blogs/${response.body.id}`)
