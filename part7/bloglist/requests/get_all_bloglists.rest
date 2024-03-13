@@ -1,0 +1,31 @@
+GET http://localhost:3003/api/blogs/
+
+###
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+
+{
+    "id": "32947487492344033943",
+    "title": "FullStackOpen is awesome!",
+    "author": "David Bayode",
+    "url": "example.com",
+    "likes": "987654321"
+}
+
+###
+DELETE http://localhost:3003/api/blogs/all
+
+###
+PUT http://localhost:3003/api/blogs/65aade0426602329cf44cc60
+Content-Type: application/json
+
+{
+    "id": "65a9806f906e1807043fbf08",
+    "title": "FullStackOpen is awesome!",
+    "author": "Davihgjd Bayode",
+    "url": "exampgfhgle.com",
+    "likes": "987654321"
+}
+
+###
+DELETE http://localhost:3003/api/blogs/65aade0426602329cf44cc60

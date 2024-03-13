@@ -1,0 +1,49 @@
+* {
+    list-style: none;
+    box-sizing: border-box;
+}
+
+*::before, *::after {
+    box-sizing: border-box;
+}
+
+input[type="submit"], button:not(.create-button) {
+    background-color: transparent;
+    border: 1px solid grey;
+    border-radius: 5px;
+    margin-left: 5px;
+}
+
+.create-button {
+    margin-top: 8px;
+    background-color: transparent;
+    border: 1px solid grey;
+    border-radius: 5px;
+}
+
+.create-button:hover {
+    background-color: lightblue;
+}
+
+ul {
+    margin: 0;
+    padding: 0;
+}
+
+.error {
+    color: rgb(255, 0, 0);
+    border-style: solid;
+    background-color: grey;
+    border-color: rgb(255, 0, 0);;
+}
+
+.success {
+    color: rgb(0, 255, 0);
+    border-style: solid;
+    background-color: grey;
+    border-color: rgb(0, 255, 0);
+}
+
+a {
+    text-decoration: none;
+}
