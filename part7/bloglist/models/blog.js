@@ -1,4 +1,3 @@
-require('dotenv').config()
 const mongoose = require('mongoose')
 mongoose.Types.ObjectId.isValid('all')
 const config = require('../utils/config')
@@ -28,7 +27,13 @@ const blogSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  id: String
+  id: String,
+  comments: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Comment'
+    }
+  ]
 })
 
 

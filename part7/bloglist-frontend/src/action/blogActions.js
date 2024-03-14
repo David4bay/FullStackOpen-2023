@@ -1,4 +1,4 @@
-import { LOAD_BLOGS } from "../reducer/blogsReducer"
+import { LOAD_BLOGS, NEW_COMMENT } from "../reducer/blogsReducer"
 import { 
     CANCELLED_DELETE_BLOG, 
     DELETE_BLOG, 
@@ -7,7 +7,7 @@ import {
     LOGGED_IN, 
     NEW_BLOG_POST, 
     RESET_NOTIFICATION, 
-    WRONG_CREDENTIALS 
+    WRONG_CREDENTIALS,
 } from "../reducer/noticeReducer"
 
 export const newBlogAction = (newBlogTitle, newBlogAuthor) => {
@@ -76,6 +76,13 @@ export const loadBlogs = (detail = []) => {
     console.log("detail from action creator", detail)
     return {
         type: LOAD_BLOGS,
+        detail,
+    }
+}
+
+export const addNewCommentAction = (detail = []) => {
+    return {
+        type: NEW_COMMENT,
         detail,
     }
 }

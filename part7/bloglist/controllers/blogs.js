@@ -4,12 +4,13 @@ const jwt = require('jsonwebtoken')
 const blogRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const Comment = require('../models/comments')
 require('express-async-errors')
 
 blogRouter.get('/', async (request, response) => {
-  const blogs = await Blog.find({}).populate('userId')
+  const blogs = await Blog.find({}).populate(['userId', 'comments'])
 
-  response.status(200).json(blogs)
+  return response.status(200).json(blogs)
 })
 
 
@@ -42,13 +43,13 @@ blogRouter.post('/', async (request, response) => {
 })
 
 blogRouter.delete('/all', async (request, response) => {
-  const token = request.token?.includes('Bearer ') ? request.token.toString().replace('Bearer', '').trim() :  request.token
-  console.log("token sent as delete request to blog router", token)
-  const decodedToken = await jwt.verify(token, process.env.SECRET)
+  // const token = request.token?.includes('Bearer ') ? request.token.toString().replace('Bearer', '').trim() :  request.token
+  // console.log("token sent as delete request to blog router", token)
+  // const decodedToken = await jwt.verify(token, process.env.SECRET)
   
-  if (!decodedToken) {
-    return response.status(401).json({ error: 'token invalid' })
-  }
+  // if (!decodedToken) {
+  //   return response.status(401).json({ error: 'token invalid' })
+  // }
   Blog.deleteMany({}).then(() => {
     response.status(200).json({
       message: 'All blogs deleted'
@@ -56,10 +57,11 @@ blogRouter.delete('/all', async (request, response) => {
   })
 })
 
+
 blogRouter.get('/:id', async (request, response) => {
   const blogId = request.params.id
 
-  const blog = await Blog.findById(blogId).populate('userId')
+  const blog = await Blog.findById(blogId).populate(['userId', 'comments'])
   if (!blog) return response.status(404).json({ error: 'blog doesn\'t exist' })
 
   return response.status(200).json(blog)
@@ -85,12 +87,12 @@ blogRouter.put('/:id', async (request, response) => {
 blogRouter.delete('/:id', async (request, response) => {
 
   const blogId = request.params.id
-  const blog = await Blog.findById(blogId).populate('userId')
+  const blog = await Blog.findById(blogId).populate(['userId', 'comments'])
 
   const token = request.token?.includes('Bearer ') ? request.token.toString().replace('Bearer', '').trim() :  request.token
   console.log("token sent as delete request to blog router", token)
   const decodedToken = jwt.verify(token, process.env.SECRET)
-
+  
   if (!decodedToken) {
     return response.status(401).json({ error: 'token invalid' })
   }
@@ -98,13 +100,47 @@ blogRouter.delete('/:id', async (request, response) => {
   if (!blog) {
     return response.status(404).json({ error: 'Blog does not exist' })
   }
-
+  
   if (blog.userId._id.toHexString() === decodedToken.id) {
-      return await Blog.findByIdAndDelete(blogId).then((data) => {
+    return await Blog.findByIdAndDelete(blogId).then((data) => {
       response.status(204).json(data)
     })
   }
-    return response.status(401).json({ error: 'User is not allowed to delete this document' })
+  return response.status(401).json({ error: 'User is not allowed to delete this document' })
 })
+
+blogRouter.post('/:id/comments', async (request, response) => {
+
+  const blogId = request.params.id
+  const newComment = request.body.comment
+  const blogs = await Blog.findById(blogId)
+
+  const token = request.token?.includes('Bearer ') ? request.token.toString().replace('Bearer', '').trim() :  request.token
+  console.log("token sent as post request to blog router to add comment", token)
+  const decodedToken = jwt.verify(token, process.env.SECRET)
+  
+  if (!decodedToken) {
+    return response.status(401).json({ error: 'token invalid' })
+  }
+
+  if (!blogs || blogs.length < 1) {
+    return response.status(404).json({ message: 'Could not find specified blog to put comment' })
+  }
+
+  const newCommentEntry = new Comment({
+    blogId: blogs._id,
+    comment: newComment
+  })
+
+  blogs.comments = blogs.comments.concat(newCommentEntry)
+
+  await blogs.save()
+  await newCommentEntry.save()
+
+  const savedComments = blogs.comments
+
+  return response.status(201).json(savedComments)
+})
+
 
 module.exports = blogRouter

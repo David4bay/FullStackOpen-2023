@@ -49,19 +49,21 @@ const App = () => {
 
     const auth = tokenHelper.tokenGetter()
 
-    blogService.getAll(setUser, setBlogs).then(({data}) => {
-      console.log("data from blog", data)
+    if (auth?.token) {
+      blogService.getAll(setUser, setBlogs).then(({data}) => {
+        console.log("data from blog", data)
+  
+        if (auth?.token && !usernameInUserReducer && !nameInReducer) {
+          dispatch(loggedInAction({ username: auth.username, name: auth.name }))
+          console.log("auth", auth)
+          console.log("usernameInReducer", usernameInUserReducer, "userInReducer", nameInReducer)
+        }
+        setUser(auth?.username)
+        data = data.sort(sortLikes)
+        setBlogs(data)
+      })
 
-      if (!usernameInUserReducer && !nameInReducer) {
-        dispatch(loggedInAction({ username: auth.username, name: auth.name }))
-        console.log("auth", auth)
-        console.log("usernameInReducer", usernameInUserReducer, "userInReducer", nameInReducer)
-      }
-
-      setUser(auth?.username)
-      data = data.sort(sortLikes)
-      setBlogs(data)
-    })
+    }
     console.log("blogs in app", blogs) 
   }, [])
 
@@ -119,6 +121,7 @@ const App = () => {
       const newBlogAuthor = response.data.author
 
       dispatch(newBlogAction(newBlogTitle, newBlogAuthor))
+      dispatch(load)
     }).catch((err) => {
     // setNotification(err.response.data?.error)
 
@@ -150,7 +153,6 @@ const App = () => {
         </Togglable>
         <BlogList 
         blogs={blogs} 
-        setBlogs={setBlogs}
         />
       </div>
     )

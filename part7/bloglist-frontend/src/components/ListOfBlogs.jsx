@@ -2,11 +2,11 @@
 
 const ListOfBlogs = ({blogOfUsers}) => {
     return (
-        <>
-        {blogOfUsers.blogs?.map(({ title }) => (
+        <ul>
+        {blogOfUsers?.map(({ title }) => (
                 <li key={title}>{title}</li>
             ))}
-        </>
+        </ul>
     )
 }
 

@@ -1,3 +1,5 @@
+
+
 export const NEW_BLOG_POST = 'NEW_BLOG_POST'
 export const ERROR_BLOG_POST = 'ERROR_BLOG_POST'
 export const RESET_NOTIFICATION = 'RESET_NOTIFICATION'
@@ -50,6 +52,7 @@ const noticeReducer = (state= initialState, action) => {
             return {
                 notification: action.message
             }
+        
         default:
             return state
     }
