@@ -1,14 +1,15 @@
-POST http://localhost:3003/api/users/all
+GET http://localhost:3003/api/users/
 
 ###
-GET http://localhost:3003/api/users/
+DELETE http://localhost:3003/api/users/all
+
 
 ###
 POST http://localhost:3003/api/users/
 Content-Type: application/json
 
 {
-    "username": "BenGrimm",
-    "name": "Ben Grimm",
+    "username": "Davidbay",
+    "name": "David Bayode",
     "password": "12345"
 }

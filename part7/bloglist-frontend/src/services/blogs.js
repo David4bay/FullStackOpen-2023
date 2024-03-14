@@ -3,7 +3,7 @@ import axios from 'axios'
 import { baseUrl, registerUrl, loginUrl, postBlogUrl } from './data'
 
 
-const getAll = async (setUser, setBlogs) => {
+const getAll = async () => {
   const auth = tokenHelper.tokenGetter()
 
   console.log('this is the token returned', auth)
@@ -61,6 +61,16 @@ const getBlogUsers = async () => {
   return response
 }
 
+const addComment = async (id, comment) => {
+  const blogUrl = postBlogUrl
+
+  const auth = tokenHelper.tokenGetter()
+
+  const response = await axios.post(`${blogUrl}/${id}/comments`, {comment}, { withCredentials: true, headers: { 'Authorization': `Bearer ${auth.token}` } })
+
+  return response
+}
+
 export default { 
   getAll, 
   login, 
@@ -68,4 +78,5 @@ export default {
   editBlog, 
   deleteBlog,
   getBlogUsers,
+  addComment
 }

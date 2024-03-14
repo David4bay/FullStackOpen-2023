@@ -5,12 +5,13 @@ import blogs from '../services/blogs'
 import { blogErrorAction, loadBlogs } from '../action/blogActions'
 import tokenHelper from '../services/tokenHelper'
 import UsersTable from './UsersTable'
-import { Routes, Route, Link } from 'react-router-dom'
+import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import UsersBlogs from './UsersBlogs'
 
 const Users = () => {
 
-    
+    const navigate = useNavigate()
+
     const dispatch = useDispatch()
     
     const username = useSelector((state) => state.user.username)
@@ -24,6 +25,8 @@ const Users = () => {
     useEffect(() => {
 
         const info = tokenHelper.tokenGetter()
+
+        if (!info) return navigate("/")
 
         dispatch(loggedInAction({ username: info.username, name: info.name}))
 

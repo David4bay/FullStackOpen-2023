@@ -14,13 +14,13 @@ const UsersBlogs = ({blogsTable}) => {
 
     const userInfo = blogsTable?.filter(({id}) => id === blogId)[0]
 
-    const blogOfUsers = blogsTable[usersBlogsIndex]
+    const blogOfUsers = userInfo?.blogs
 
-    // console.log("usersBlogsIndex", usersBlogsIndex)
+    console.log("usersBlogsIndex", usersBlogsIndex)
 
-    // console.log("userInfo", userInfo)
+    console.log("userInfo", userInfo)
 
-    // console.log("blogOfUsers", blogOfUsers)
+    console.log("blogOfUsers", blogOfUsers)
 
     return (
         <>
@@ -28,10 +28,10 @@ const UsersBlogs = ({blogsTable}) => {
             <h3>
                 added blogs
             </h3>
-            {blogOfUsers ? 
-            <ul>
+            {blogOfUsers.length> 0 ? 
+            <>
                 <ListOfBlogs blogOfUsers={blogOfUsers} />
-            </ul> : 
+            </> : 
             <p>No blogs available from this user.</p>
             }
         </>
