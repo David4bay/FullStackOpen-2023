@@ -1,5 +1,6 @@
 const { ApolloServer } = require('@apollo/server')
 const { startStandaloneServer } = require('@apollo/server/standalone')
+const { v1: uuid } = require('uuid')
 
 let authors = [
   {
@@ -108,17 +109,38 @@ const typeDefs = `
     title: String!
     published: Int!
     author: String
-    id: String!
     genres: [String]
+    id: String!
   }
 
   type Query {
     authorCount: Int!
     bookCount: Int!
-    allBooks: [Book!]!
+    allBooks(author: String!, genres: String!): [Book!]!
     allAuthors: [Author!]!
-    findBook(title: String!): Book
+    findBook(genres: String!): Book
     findAuthor(name: String!): Author
+    getAllAuthors: [Author!]!
+    getAllBooks: [Book!]!
+  }
+
+  type Mutation {
+    addBook(
+      title: String!
+      published: String!
+      author: String
+      genres: [String]
+    ): Book
+
+    editAuthor(
+      name: String!
+      born: Int
+    ): Author
+
+    addAuthor(
+      name: String!
+      born: Int
+    ): Author
   }
 `
 
@@ -126,13 +148,78 @@ const resolvers = {
   Query: {
     authorCount: () => author.length,
     bookCount: () => books.length,
-    allBooks: () => books,
-    allAuthors: () => authors,
+    allBooks: (root, args) => {
+      return args.author ? books.filter((book) => book.author.includes(args.author) && book.genres.includes(args.genres)) : books
+    },
+    allAuthors: (root, args) => {
+      return args.name ? authors.filter((author) => author.name.includes(args.name)) : authors
+    },
     findBook: (root, args) => {
-        return books.find(book => book.title.includes(args.title))
+        return books.find(book => book.genres.includes(args.genres))
     },
     findAuthor: (root, args) => {
         return authors.find(author => author.name.includes(args.name))
+    },
+    getAllAuthors: () => authors,
+    getAllBooks: () => books
+  },
+  Mutation: {
+    addBook: (root, args) => {
+
+      const author = args.author.split(' ') ?  args.author.trim().split(' ').map((name) => name[0].toUpperCase() + name.slice(1,)).join(' ') : null
+
+      console.log("author", author)
+
+      if (args.author === null) {
+        return null
+      }
+      
+      const book = {...args, author, id: uuid() }
+      books = books.concat(book)
+      return book
+    },
+    editAuthor: (root, args) => {
+
+      const authorName = typeof(args.name) === 'string' ? args.name.toLowerCase().trim() : null
+
+      const searchedAuthor = authors.find((author) => author.name.toLowerCase().includes(authorName))
+      
+      const titleCasedAuthor = (/\s/).test(authorName) ? authorName.split(' ').map((word) => word[0].toUpperCase() + word.slice(1,)).join(' ') : authorName[0].toUpperCase() + authorName.slice(1,)
+
+      if (!authorName || authorName === null) return null
+
+      
+      if (!searchedAuthor) {
+        return null
+      }
+      
+      const updatedAuthor = {...searchedAuthor, name: titleCasedAuthor, born: args.born ? args.born : null}
+
+      authors = authors.map((author) => author.name.toLowerCase() === authorName ? updatedAuthor : author)
+
+      return updatedAuthor
+    },
+    addAuthor: (root, args) => {
+
+      const authorName = typeof(args.name) === 'string' ? args.name.toLowerCase().trim() : null
+
+      const born = Number(args.born) ? Number(args.born) : null
+
+      const alreadyExists = authors.find((author) => author.name.toLowerCase().includes(authorName))
+
+      console.log("alreadyExists", alreadyExists)
+
+      if (alreadyExists) {
+        return null
+      }
+
+      const titleCasedAuthor = (/\s/).test(authorName) ? authorName.split(' ').map((word) => word[0].toUpperCase() + word.slice(1,)).join(' ') : authorName[0].toUpperCase() + authorName.slice(1,)
+
+      const newAuthor = {name: titleCasedAuthor, id: uuid(), born}
+
+      authors = authors.concat(newAuthor)
+      console.log("updated authors", authors)
+      return newAuthor
     }
   }
 }
