@@ -4,7 +4,7 @@ import { EDIT_AUTHOR, ALL_AUTHORS } from '../queries/graphqlQueries'
 
 const Authors = (props) => {
 
-  const [date, setDate] = useState("1")
+  const [date, setDate] = useState("1990")
 
   const [ editAuthor ] = useMutation(EDIT_AUTHOR, {
     refetchQueries: [{ query: ALL_AUTHORS }]
@@ -18,15 +18,15 @@ const Authors = (props) => {
     return null
   }
 
-  const uniqueAuthorNames = Array.from(new Set(props.authors.map((author) => author.author)))
+  const uniqueAuthorNames = Array.from(new Set(props.authors.map((author) => author.author.name)))
 
-  const authors = uniqueAuthorNames.map((author) => (
-    {
-      author: author,
-      published: props.authors.filter((book) => book.author === author).length,
-      born: props.bornIn.filter(({born, name}) => name === author)[0]?.born || "unknown"
+  const authors = props.authors.map((detail) => {
+    return {
+      author: detail.author.name,
+      published: detail.published,
+      born: detail.author.born
     }
-  ))
+  })
 
   const buttonStyle = {
     backgroundColor: "transparent",
@@ -40,7 +40,7 @@ const Authors = (props) => {
 
     const authorName = selectRef.current.value
     editAuthor({ variables: { name: authorName, born: Number(date) ? Number(date) : 0}})
-    setDate("1")
+    setDate("1990")
   }
 
   console.log("authors", authors)

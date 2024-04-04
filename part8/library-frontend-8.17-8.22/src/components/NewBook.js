@@ -1,3 +1,4 @@
+import { Navigate } from 'react-router-dom'
 import { useReducer } from 'react'
 import { useMutation } from '@apollo/client'
 import { ADD_AUTHOR, CREATE_NEW_BOOK, ALL_AUTHORS } from '../queries/graphqlQueries'
@@ -61,14 +62,18 @@ const NewBook = (props) => {
     refetchQueries: [{query: ALL_AUTHORS }]
   })
 
-  const [ addAuthor ] = useMutation(ADD_AUTHOR)
+  const [ addAuthor ] = useMutation(ADD_AUTHOR, {
+    refetchQueries: [{query: ALL_AUTHORS }]
+  })
 
   const submit = async (event) => {
     event.preventDefault()
 
     console.log('add book...')
 
-    createBook({ variables: { title: state.title, published: state.published, author: state.author, genres: state.genres }})
+    let number = Number(+state.published)
+
+    createBook({ variables: { title: state.title, published: number, author: state.author, genres: state.genres }})
     addAuthor({ variables: { name: state.author, born: null }})
 
     dispatch({ type: SUBMITTED })
@@ -79,12 +84,8 @@ const NewBook = (props) => {
     dispatch({ type: ADD_GENRE, payload: state.genre })
   }
 
-  const styledButtons = {
-    backgroundColor: 'transparent',
-    border: '1px solid grey',
-    borderRadius: '3px',
-    padding: '2px',
-    marginTop: '2px'
+  if (!props.token ) {
+    return <Navigate to="/" />
   }
 
   return (
@@ -131,12 +132,12 @@ const NewBook = (props) => {
             autoComplete="true"
             id="genre"
           />
-          <button style={styledButtons} onClick={addGenre} type="button">
+          <button onClick={addGenre} type="button">
             add genre
           </button>
         </div>
         <div>genres: {state?.genres?.join(' ')}</div>
-        <button style={styledButtons} type="submit">create book</button>
+        <button type="submit">create book</button>
       </form>
     </div>
   )

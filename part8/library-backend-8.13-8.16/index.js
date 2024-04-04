@@ -121,7 +121,7 @@ const resolvers = {
 
     getAllAuthors: async () => Author.find({}),
 
-    getAllBooks: async () => Book.find({}),
+    getAllBooks: async () => Book.find({}).populate('author'),
 
     me: (root, args, context) => context.currentUser
 
@@ -163,7 +163,7 @@ const resolvers = {
       return { value: jwt.sign(userForToken, process.env.JWT_SECRET)}
     },
 
-    addBook: async (root, args) => {
+    addBook: async (root, args, context) => {
 
       const currentUser = context.currentUser
 
@@ -183,20 +183,32 @@ const resolvers = {
         return null
       }
 
-      let foundAuthor = Author.findOne({ name: author })
+      let foundAuthor = await Author.findOne({ name: author })
 
       if (!foundAuthor) {
-        foundAuthor = new Author({ name: author, born: null }).save()
+        foundAuthor = new Author({ name: author, born: null })
+
+        try {
+          await foundAuthor.save()
+        } catch (error) {
+          throw new GraphQLError('Failed to create author', {
+            extensions: {
+              code: 'INTERNAL_SERVER_ERROR',
+              invalidArgs: author,
+              error
+            }
+          })
+        }
       }
-      // console.log("foundAuthor", foundAuthor)
-      const book = {...args, genres: [...args.genres], published: Number(args.published), author: foundAuthor.name }
+      console.log("foundAuthor", foundAuthor)
+      const book = {...args, genres: [...args.genres], published: Number(args.published), author: foundAuthor._id.toString() }
       
       let newBook = new Book({...book})
 
      try {
       newBook.save()
      } catch (error) {
-      throw new GraphQLErrow('Adding book failed', {
+      throw new GraphQLError('Adding book failed', {
         extensions: {
           code: 'BAD_USER_INPUT',
           invalidArgs: args.author,
@@ -208,7 +220,7 @@ const resolvers = {
      return newBook
     },
 
-    editAuthor: async (root, args) => {
+    editAuthor: async (root, args, context) => {
 
       const currentUser = context.currentUser
 
