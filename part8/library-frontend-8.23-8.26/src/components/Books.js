@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { useQuery, useApolloClient } from '@apollo/client'
+import { useQuery } from '@apollo/client'
 import { FILTER_GENRE } from '../queries/graphqlQueries'
 import { useLocation } from 'react-router-dom'
 import Login from './Login'
@@ -7,6 +7,7 @@ import DefaultBooks from './DefaultBooks'
 import FilteredBooks from './FilteredBooks'
 
 /*
+
 Exercise 8.19
 
  Filtering of books by genre successfully implemented by sending the books data as props and destructuring
@@ -23,31 +24,30 @@ Exercise 8.19
 
  */
 
-
 const Books = (props) => {
 
   const [listOfBooks, setListOfBooks] = useState(null)
   const [defaultBooks, setDefaultBooks] = useState(true)
   const [genreTitle, setGenreTitle] = useState(null)
 
-  const { loading, error, data, refetch } = useQuery(FILTER_GENRE, {
+  const location = useLocation()
+
+  // const fetchData = props.refetch
+
+  const { loading, error, refetch } = useQuery(FILTER_GENRE, {
     variables: { genreTitle },
     skip: true
   })
 
-  if (data) {
-    console.log("data from the top", data)
-  }
-
   const { token, loginPage } = props
 
-  console.log("props.books in books component", props.books)
+  console.log("props.books in books component", props?.books)
 
-  let books = useMemo(() => [...props.books.map((detail) => {
+  let books = useMemo(() => [...props?.books?.map((detail) => {
     return {
-      title: detail.title,
-      author: detail.author.name,
-      published: detail.published,
+      title: detail?.title,
+      author: detail?.author?.name,
+      published: detail?.published,
       genres: detail?.genres
     }
   })], [props.books])
@@ -59,32 +59,36 @@ const Books = (props) => {
   }, [listOfBooks, books])
 
   useEffect(() => {
-    if (genreTitle) {
+
+    if (genreTitle === 'default') {
+      console.log('genre title is default, will pick default books', books)
+        setListOfBooks(books)
+        setGenreTitle(null)
+        setDefaultBooks(true)
+
+    }
+
+    if (genreTitle !== null && genreTitle !== 'default') {
 
       console.log("genreTitle in useEffect", genreTitle)
+
       refetch().then(({data}) => {
+
         console.log("data fetched from refetch fn", data)
+
         setListOfBooks(data.filterBook)
         setGenreTitle(null)
         setDefaultBooks(false)
       })
       
     }
-  }, [genreTitle, refetch])
-
-  useEffect(() => {
-    if (data) {
-      console.log('data in useEffect', data)
-    }
-  }, [data])
-
-  const location = useLocation()
+  }, [genreTitle, refetch, books])
 
   console.log("location path name", typeof location.pathname === 'string')
 
 
   // Used concat so if there's an empty genre array it is removed when spread into it.
-  const listOfGenre = [].concat(...props.books.map((book) => {
+  let listOfGenre = [].concat(...props.books.map((book) => {
     return book.genres
   }))
 
@@ -93,7 +97,7 @@ const Books = (props) => {
   if (!props.books) {
     return null
   }
-
+  
 
   if (!token && loginPage && location.pathname === '/') {
     return (
@@ -104,7 +108,7 @@ const Books = (props) => {
     />
     )
   }
-
+  
   const genreStyles = {
     display: 'flex',
     flexDirection: 'row',
@@ -117,7 +121,7 @@ const Books = (props) => {
     let bookGenreType = e.target.innerText
 
     console.log(bookGenreType)
-
+    
     setGenreTitle(bookGenreType)
 
     /* React will no longer be in charge of filtering the books */
@@ -142,10 +146,15 @@ const Books = (props) => {
     // setListOfBooks(filteredBooks)
   }
 
-  console.log("listOfBooks", listOfBooks)
+  // turning the list of genre to a set to remove duplicates then converting back to an array
+  listOfGenre = Array.from(new Set(listOfGenre))
+
+  if (error) {
+    return <h3>Sorry...something went wrong.</h3>
+  }
 
   if (listOfBooks && !defaultBooks) {
-    console.log("data in the component", data)
+    
     return loading ? <h3>Loading...</h3> : (
     <FilteredBooks 
       listOfBooks={listOfBooks}

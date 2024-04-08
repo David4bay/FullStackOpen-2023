@@ -53,12 +53,13 @@ const typeDefs = `
     bookCount: Int!
     allBooks(author: String!, genres: String!): [Book!]!
     allAuthors: [Author!]!
-    findBook(genres: String!): Book
+    findBook(genres: String!): [Book]
     findAuthor(name: String!): Author
+    filterBook(genreTitle: String!): [Book]
     getAllAuthors: [Author!]!
     getAllBooks: [Book!]!
     me: User
-    
+    getUsersFavoriteBooks: [Book]
   }
 
   type Mutation {
@@ -99,31 +100,183 @@ const typeDefs = `
 const resolvers = {
   Query: {
 
-    authorCount: async () => Author.collection.countDocuments(),
+    authorCount: async () => {
+      let authorCount
 
-    bookCount: async () => Book.collection.countDocuments(),
+      try {
+        authorCount = Author.collection.countDocuments()
+      } catch (error) {
+        throw new GraphQLError('Failed to fetch author count.', {
+          extensions: 'REQUEST_FAILED',
+          error
+        })
+      }
+      return authorCount
+    },
+
+    bookCount: async () => {
+      let bookCount
+
+      try {
+
+        bookCount = Book.collection.countDocuments()
+      } catch (error) {
+        throw new GraphQLError('Failed to fetch book count.', {
+          extensions: 'REQUEST_FAILED',
+          error
+        })
+      }
+      return bookCount
+    },
+
+    filterBook: async (root, args) => {
+      let filteredBooks
+
+      try {
+
+        filteredBooks = Book.find({ genres: args.genreTitle }).populate("author")
+      } catch (error) {
+        throw new GraphQLError('Failed to find book', {
+          extensions: 'BAD_USER_INPUT',
+          invalidArgs: args.genreTitle,
+          error
+        })
+      }
+      return filteredBooks
+    },
 
     allBooks: async (root, args) => {
-      return Book.find({})
+      let allBooksFound
+
+      try {
+      allBooksFound = Book.find({}).populate("author")
+      } catch (error) {
+        throw new GraphQLError('Failed to retrieve all books', {
+          extensions: 'REQUEST_FAILED',
+          error
+        })
+      }
+      return allBooksFound
     },
 
     allAuthors: async (root, args) => {
-      return Author.find({})
+
+      let allAuthors 
+
+      try {
+        allAuthors = Author.find({})
+      } catch (error) {
+        throw new GraphQLError('Failed to find all authors', {
+          extensions: 'REQUEST_FAILED',
+          error
+        })
+      }
+      return allAuthors
     },
 
     findBook: async (root, args) => {
-        return Book.find({ genres: args.genres })
+      let foundBook
+
+      try {
+        foundBook = Book.find({ genres: { $in: [args.genres] } }).populate("author")
+      } catch (error) {
+        throw new GraphQLError('Failed to find specified book.', {
+          extensions: 'REQUEST_FAILED',
+          invalidArgs: args.genres,
+          error
+        })
+      }
+
+      return foundBook
     },
 
     findAuthor: async (root, args) => {
-        return Author.find({ name: args.name })
+
+      let author
+
+      try {
+        author = await Author.findOne({ name: args.name })
+
+        console.log("author data on the backend", author)
+
+      } catch (error) {
+        throw new GraphQLError('Failed to find author with name', {
+          extensions: 'BAD_USER_INPUT',
+          invalidArgs: args.name,
+          error
+        })
+      }
+        return author
     },
 
-    getAllAuthors: async () => Author.find({}),
+    getAllAuthors: async () => {
 
-    getAllBooks: async () => Book.find({}).populate('author'),
+      let authors
 
-    me: (root, args, context) => context.currentUser
+      try {
+        authors = Author.find({})
+      } catch (error) {
+        throw new GraphQLError('Failed to fetch authors', {
+          extensions: 'REQUEST_FAILED',
+          error
+        })
+      }
+      return authors
+    },
+
+    getAllBooks: async () => {
+
+      let allBooks
+
+      try {
+        allBooks = Book.find({}).populate("author")
+      } catch (error) {
+        throw new GraphQLError('Failed to fetch all books.', {
+          extensions: 'REQUEST_FAILED',
+          error
+        })
+      }
+      return allBooks
+    },
+
+    me: (root, args, context) => {
+      let user
+
+      try {
+        user = context.currentUser
+      } catch (error) {
+        throw new GraphQLError('Failed to retrieve user.', {
+          extensions: 'REQUEST_FAILED',
+          error
+        })
+      }
+      return user
+    },
+
+    getUsersFavoriteBooks: async (root, args, context) => {
+      
+      let userFavorite = context.currentUser.favoriteGenre
+      let recommendedBooks
+
+      console.log("userFavorite", userFavorite)
+
+      if (!userFavorite) {
+        throw new GraphQLError('Failed to find user favorite genre.', {
+          extension: 'REQUEST_FAILED',
+        })
+      }
+
+      try {
+        recommendedBooks = await Book.find({ genres: userFavorite }).populate('author')
+      } catch (error) {
+        throw new GraphQLError('Failed to fetch recommended books.', {
+          extensions: 'BAD_USER_INPUT',
+          error
+        })
+      }
+      console.log("recommended books", recommendedBooks)
+      return recommendedBooks
+    }
 
   },
   Mutation: {
@@ -219,6 +372,7 @@ const resolvers = {
 
      return newBook
     },
+
 
     editAuthor: async (root, args, context) => {
 
