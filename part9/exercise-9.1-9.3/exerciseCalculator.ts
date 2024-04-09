@@ -8,9 +8,11 @@ interface Result {
     average: number;
 }
 
-const exerciseCalculator = (exerciseInfo: number[], target: number): void => {
+const exerciseCalculator = (exerciseInfo: number[] = [...process.argv.slice(2).map(Number)], target: number = Number(process.argv[2])): void => {
 
-    const defaultPeriod: number = 7
+    console.log()
+
+    const defaultPeriod: number = exerciseInfo.length
 
     const averageDaysExercising: number = Number((exerciseInfo.reduce((acc, num) => acc + num, 0) / defaultPeriod).toFixed(2))
 
@@ -38,4 +40,8 @@ const exerciseCalculator = (exerciseInfo: number[], target: number): void => {
     return console.log(result)
 }
 
-exerciseCalculator([2, 3, 1, 0, 5, 1, 4], 3)
+exerciseCalculator()
+
+// target 3
+
+// days 2 3 1 0 5 1 4

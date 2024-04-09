@@ -2,7 +2,7 @@
 
 // Calculates the body mass index of an individual with height in centimetres and weight in kilograms
 
-const calculateBMI = (height: number, weight: number):void => {
+const calculateBMI = (height: number = Number(process.argv[2]), weight: number = Number(process.argv[3])): void => {
 
     let centimetresToMetres: number = height / 100
 
@@ -14,7 +14,10 @@ const calculateBMI = (height: number, weight: number):void => {
 
     if (bodyMassIndex <= 18.4) return console.log('Underweight (unhealthy weight)')
 
+    console.log(process.argv[2], process.argv[3])
     console.log('Normal (healthy weight)')
 }
 
-calculateBMI(170, 65)
+calculateBMI()
+// height 170 
+// weight 65
