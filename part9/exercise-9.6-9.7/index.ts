@@ -7,7 +7,7 @@ app.use(express.json());
 
 app.get('/hello', function(request, response) {
     console.log("request came from ip", request.ip, "with headers", request.headers);
-    response.status(200).json({
+    return response.status(200).json({
         message: 'Hello Full Stack!'
     });
 });
